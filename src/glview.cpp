@@ -1,5 +1,6 @@
 #include "glview.h"
 
+#include "matqt.h"
 #include <array>
 #include "util.h"
 
@@ -34,13 +35,6 @@ void GLView::resizeGL(int _width, int _height)
 	// Store GL canvas sizes in object properties
 	m_width = _width;
 	m_height = _height;
-
-	// Setup world space window limits based on model bounding box
-	//scaleWorldWindow(1.00);
-	//m_left = 0;
-	//m_right = m_width;
-	//m_bottom = 0;
-	//m_top = _height;
 
 	// Setup the viewport to canvas dimensions
 	glViewport(0, 0, (GLint)m_width, (GLint)m_height);
@@ -87,14 +81,17 @@ void GLView::drawXAxis()
 	for (int i = 0; i < m_x_ticks.size(); i++)
 		ticks[i] = (m_x_ticks[i] - m_x_min) / (m_x_max - m_x_min);
 
+	// Get world coordinates
+	ticks = interp1(m_left, m_right, ticks);
+
 	// Draw ticks
 	glColor3f(0.0, 0.0, 0.0);
 	glLineWidth(1.0);
 	for (int i = 0; i < ticks.size(); i++)
 	{
 		glBegin(GL_LINE_STRIP);
-		glVertex2d(ticks[i], 0.00);
-		glVertex2d(ticks[i], 0.015);
+		glVertex2d(ticks[i], m_bottom);
+		glVertex2d(ticks[i], m_bottom + 0.015*(m_top - m_bottom));
 		glEnd();
 	}	
 }
@@ -106,14 +103,17 @@ void GLView::drawYAxis()
 	for (int i = 0; i < m_y_ticks.size(); i++)
 		ticks[i] = (m_y_ticks[i] - m_y_min) / (m_y_max - m_y_min);
 
+	// Get world coordinates
+	ticks = interp1(m_bottom, m_top, ticks);
+
 	// Draw ticks
 	glColor3f(0.0, 0.0, 0.0);
 	glLineWidth(1.0);
 	for (int i = 0; i < ticks.size(); i++)
 	{
 		glBegin(GL_LINE_STRIP);
-		glVertex2d(0.00, ticks[i]);
-		glVertex2d(0.015,ticks[i]);
+		glVertex2d(m_left, ticks[i]);
+		glVertex2d(m_left + 0.015*(m_right - m_left),ticks[i]);
 		glEnd();
 	}
 }
@@ -160,14 +160,95 @@ void GLView::scaleWorldWindow(double _scaleFac)
 	update();
 }
 
+void GLView::scaleWorldWindow(double _scaleFac, double _pcx, double _pcy)
+{
+	double cx, cy;       // window center
+	double sizex, sizey; // window sizes
+
+	// Set new window sizes based on scaling factor.
+	sizex = (m_right - m_left);
+	sizey = (m_top - m_bottom);
+
+	// Get current window center.
+	cx = m_left + sizex * _pcx;
+	cy = m_bottom + sizey * _pcy;
+
+	// Adjust window 
+	double szLeft = sizex * _pcx;
+	double szBottom = sizey * _pcy;
+	m_left = cx - szLeft * _scaleFac;
+	m_right = cx + (sizex - szLeft) * _scaleFac;
+	m_bottom = cy - szBottom * _scaleFac;
+	m_top = cy + (sizey - szBottom) * _scaleFac;
+
+	// Establish the clipping volume by setting up an
+	// orthographic projection
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
+
+	update();
+}
+
+void GLView::panWorldWindow(double _panFacX, double _panFacY)
+{
+	// Compute pan distances in horizontal and vertical directions.
+	double panX = (m_right - m_left) * _panFacX;
+	double panY = (m_top - m_bottom) * _panFacY;
+
+	// Shift current window.
+	m_right += panX;
+	m_left += panX;
+	m_top += panY;
+	m_bottom += panY;
+
+	// Establish the clipping volume by setting up an
+	// orthographic projection
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
+
+	update();
+}
+
+double GLView::worldLeft() const
+{
+	return m_left;
+}
+
+double GLView::worldRight() const
+{
+	return m_right;
+}
+
+double GLView::worldBottom() const
+{
+	return m_bottom;
+}
+
+double GLView::worldTop() const
+{
+	return m_top;
+}
+
+int GLView::worldWidth() const
+{
+	return 1.0;
+}
+
+int GLView::worldHeight() const
+{
+	return 1.0;
+}
+
 int GLView::width() const
 {
-	return m_right - m_left;
+	return m_width;
 }
 
 int GLView::height() const
 {
-	return m_top - m_bottom;
+	return m_height;
 }
 
 void GLView::renderBegin()
@@ -178,6 +259,11 @@ void GLView::renderBegin()
 void GLView::renderEnd()
 {
 	glEndList();
+}
+
+void GLView::setBackEnd(matplot::backend::MatQt* _backend)
+{
+	m_backend = _backend;
 }
 
 void GLView::setXAxis(double _min, double _max, const std::vector<double>& _ticks)
@@ -267,4 +353,25 @@ void GLView::drawPolygon(const std::vector<double>& x, const std::vector<double>
 		glVertex2d(x[j], y[j]);
 	}
 	glEnd();
+}
+
+void GLView::mousePressEvent(QMouseEvent* _event)
+{
+	m_backend->mousePressEvent(_event);
+
+	Qt::MouseButton mouseButton = _event->button();
+	if (mouseButton == Qt::MiddleButton)
+		setCursor(Qt::ClosedHandCursor);
+}
+
+void GLView::mouseMoveEvent(QMouseEvent* _event)
+{
+	m_backend->mouseMoveEvent(_event);
+	
+	update();
+}
+
+void GLView::wheelEvent(QWheelEvent* _event)
+{
+	m_backend->wheelEvent(_event);
 }

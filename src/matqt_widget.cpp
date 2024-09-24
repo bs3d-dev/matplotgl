@@ -10,26 +10,31 @@ MatQtWidget::~MatQtWidget()
 {
 }
 
-void MatQtWidget::setAxis(double x_min, double x_max, double y_min, double y_max, const std::vector<double>& x_ticks, const std::vector<double>& y_ticks, const std::vector<double>& x_pos, const std::vector<double>& y_pos)
+void MatQtWidget::setXAxis(double x_min, double x_max, const std::vector<double>& x_ticks, const std::vector<std::string>& x_labels, int _exp)
 {
-
 
 	ui.xAxisWidget->setLimits(x_min, x_max);
-	ui.xAxisWidget->setTicks(x_ticks);
+	ui.xAxisWidget->setTicks(x_ticks, x_labels);
+	ui.xAxisWidget->setExp(_exp);
 	ui.xAxisWidget->update();
 
-	ui.yAxisWidget->setLimits(y_min, y_max);
-	ui.yAxisWidget->setTicks(y_ticks);
-	ui.yAxisWidget->update();
-
 	ui.canvas->setXAxis(x_min, x_max, x_ticks);
-	ui.canvas->setYAxis(y_min, y_max, y_ticks);
-
 }
 
-void MatQtWidget::setColorbar(double contour_min, double contour_max, const std::vector<double>& contour_levels)
+void MatQtWidget::setYAxis(double y_min, double y_max, const std::vector<double>& y_ticks, const std::vector<std::string>& y_labels, int _exp)
 {
-	ui.colorbar->setContourLevels(contour_min, contour_max, contour_levels);
+
+	ui.yAxisWidget->setLimits(y_min, y_max);
+	ui.yAxisWidget->setTicks(y_ticks, y_labels);
+	ui.yAxisWidget->setExp(_exp);
+	ui.yAxisWidget->update();
+
+	ui.canvas->setYAxis(y_min, y_max, y_ticks);
+}
+
+void MatQtWidget::setColorbar(double contour_min, double contour_max, const std::vector<double>& contour_levels, const std::vector<std::string>& contour_labels, int _exp)
+{
+	ui.colorbar->setContourLevels(contour_min, contour_max, contour_levels, contour_labels,_exp);
 }
 
 void MatQtWidget::setXLabel(const std::string& _x_label)

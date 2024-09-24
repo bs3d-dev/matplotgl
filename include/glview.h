@@ -2,6 +2,15 @@
 
 #include <QtOpenGL/QGLWidget>
 
+namespace matplot
+{
+	namespace backend
+	{
+	class MatQt;
+	}
+}
+
+
 class GLView : public QGLWidget
 {
 
@@ -13,12 +22,22 @@ public:
 
 	// Display functions
 	void scaleWorldWindow(double _scaleFac);
+	void scaleWorldWindow(double _scaleFac, double _pcx, double _pcy);
+	void panWorldWindow(double _panFacX, double _panFacY);
 
+	double worldLeft() const;
+	double worldRight() const;
+	double worldBottom() const;
+	double worldTop() const;
+	int worldWidth() const;
+	int worldHeight() const;
 	int width() const;
 	int height() const;
 
 	void renderBegin();
 	void renderEnd();
+
+	void setBackEnd(matplot::backend::MatQt* _backend);
 
 	void setXAxis(double _min, double _max, const std::vector<double>& _ticks);
 	void setYAxis(double _min, double _max, const std::vector<double>& _ticks);
@@ -29,6 +48,13 @@ public:
 	void drawPolygon(const std::vector<double>& x, const std::vector<double>& y, const std::vector<std::array<float, 4>>& color);
 	void drawPolygon(const std::vector<double>& x, const std::vector<double>& y, const std::array<float, 4>& color);
 
+public slots:
+	// Mouse events slots
+	void mousePressEvent(QMouseEvent* event);
+	void mouseMoveEvent(QMouseEvent* event);
+	void wheelEvent(class QWheelEvent* _event);
+
+
 private:
 	// Canvas predefined slots
 	void initializeGL();
@@ -37,7 +63,6 @@ private:
 
 	void drawXAxis();
 	void drawYAxis();
-
 
 	// Viewport properties
 	int m_width;                   // width: GL canvas horizontal size
@@ -60,5 +85,7 @@ private:
 
 	std::vector<double> m_x_ticks;
 	std::vector<double> m_y_ticks;
+
+	matplot::backend::MatQt* m_backend;
 
 };

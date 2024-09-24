@@ -23,6 +23,23 @@ struct Param2Px
 	std::tuple<double, double>  operator()(double tx, double ty) { return std::tuple<double, double>(x(tx), y(ty)); };
 };
 
+template<typename T>
+static T interp1(const T& a, const T& b, const T& t)
+{
+	return a + t * (b - a);
+}
+
+template<typename T>
+static std::vector<T> interp1(const T& a, const T& b, const std::vector<T>& t)
+{
+	std::vector<T> r(t.size());
+	for (size_t i = 0; i < t.size(); i++)
+	{
+		r[i] = interp1(a, b, t[i]);
+	}
+	return r;
+}
+
 static int number_of_lines(const fs::path& file)
 {
 	std::ifstream in(file);

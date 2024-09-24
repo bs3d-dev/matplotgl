@@ -7,7 +7,7 @@
 Colorbar::Colorbar(QWidget* parent)
 	: m_right_margin(0.00)
 	, m_left_margin(0.00)
-	, m_top_margin(10.00)
+	, m_top_margin(30.00)
 	, m_bottom_margin(10.00)
 {
 	pen = QPen(Qt::black, 0.00, Qt::PenStyle::SolidLine, Qt::PenCapStyle::FlatCap, Qt::PenJoinStyle::BevelJoin);
@@ -27,11 +27,13 @@ QSize Colorbar::sizeHint() const
 	return QSize(50,500);
 }
 
-void Colorbar::setContourLevels(double contour_min, double contour_max, const std::vector<double>& contour_levels)
+void Colorbar::setContourLevels(double contour_min, double contour_max, const std::vector<double>& contour_levels, const std::vector<std::string>& contour_labels, int _exp)
 {
 	m_cmin = contour_min;
 	m_cmax = contour_max;
 	m_levels = contour_levels;
+	m_levels_labels = contour_labels;
+	m_exp = _exp;
 
 	update();
 }
@@ -91,6 +93,34 @@ void Colorbar::paintEvent(QPaintEvent* event)
 	for (int i = 0; i < m_levels.size(); i++)
 	{
 		text_rect.moveTop(ticks_y[i] - font_max_height / 2.00);
-		painter.drawText(text_rect, Qt::AlignBottom | Qt::AlignLeft, QString::number(m_levels[i]));
+		painter.drawText(text_rect, Qt::AlignBottom | Qt::AlignLeft, QString::fromStdString(m_levels_labels[i]));
 	}
+
+	//Draw exponential
+	if (m_exp != 0)
+	{
+
+		QFont exp_font = painter.font();
+		exp_font.setPointSizeF(exp_font.pointSize() / 1.25);
+		QFontMetrics exp_metrics(exp_font);
+
+		QRectF dec_exp_rect = rect();
+		dec_exp_rect.setLeft(text_rect.left());
+		QRectF dec_rect = font_metrics.boundingRect("x 10");
+		QRectF exp_rect = exp_metrics.boundingRect(QString::number(m_exp));
+
+		//dec_exp_rect.setLeft(dec_exp_rect.right() - dec_rect.width() - exp_rect.width() * 2);
+		dec_exp_rect.setHeight(dec_rect.height() + exp_rect.height());
+
+		painter.drawText(dec_exp_rect, Qt::AlignBottom | Qt::AlignLeft, QString("x 10"));
+
+		dec_exp_rect.setBottomLeft(dec_exp_rect.bottomLeft() + dec_rect.topRight());
+
+		painter.save();
+		painter.setFont(exp_font);
+		dec_exp_rect.translate(exp_rect.width() / 2, exp_rect.height() / 2);
+		painter.drawText(dec_exp_rect, Qt::AlignBottom | Qt::AlignLeft, QString::number(m_exp));
+		painter.restore();
+	}
+
 }

@@ -16,6 +16,8 @@
 
 #include <matplot/backend/backend_interface.h>
 
+#include <QMouseEvent>
+
 class MatQtWidget;
 
 namespace matplot::backend {
@@ -81,17 +83,35 @@ namespace matplot::backend {
 			const std::vector<double>& y,
 			const std::array<float, 4>& color) override;
 
-		void draw_axis(double x_min, double x_max, double y_min, double y_max,
-			const std::vector<double>& x_ticks, const std::vector<double>& y_ticks,
-			const std::vector<double>& x_pos,
-			const std::vector<double>& y_pos) override;
+		void draw_axis(double x_min, double x_max, double y_min, double y_max) override;
 
-		void draw_colorbar(double contour_min, double contour_max, const std::vector<double>& contour_levels) override;
+		void draw_colorbar(double contour_min, double contour_max) override;
 		void draw_labels(const std::string& x_label, const std::string& y_label) override;
 		void draw_title(const std::string& _title) override;
 
+		// Mouse events slots
+		void mousePressEvent(QMouseEvent* event);
+		void mouseMoveEvent(QMouseEvent* event);
+		void wheelEvent(class QWheelEvent* _event);
+
+	protected:
+		void updateAxis();
+
 	private:
 		MatQtWidget* m_widget;
+
+		// Axes in world coordinates
+		double m_xmin;
+		double m_xmax;
+		double m_ymin;
+		double m_ymax;
+
+		// QPoint is a Qt class that defines a point in a plane
+		// i.e. the position of the mouse on the canvas.
+		QPoint m_pt0;             // mouse position at button press event
+		QPoint m_pt1;             // current mouse position
+		QPoint m_pt2;             // previous mouse position
+		int m_mouseMoveTol;       // tolerance for mouse move
 
 	};
 } // namespace matplot::backend

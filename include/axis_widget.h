@@ -17,8 +17,9 @@ public:
 	virtual QSize sizeHint() const = 0;
 
 	void setLimits(double _min, double _max);
-	void setTicks(const std::vector<double>& _ticks);
+	void setTicks(const std::vector<double>& _ticks, const std::vector<std::string>& _ticks_labels);
 	void setLabel(const std::string& _label);
+	void setExp(int _exp);
 
 protected:
 	virtual void paintEvent(QPaintEvent* event) = 0;
@@ -27,6 +28,8 @@ protected:
 	double m_min;
 	double m_max;
 	std::vector<double> m_ticks;
+	std::vector<std::string> m_ticks_labels;
+	int m_exp;
 	std::string m_label;
 	QPen pen;
 	int m_canvas_margin;

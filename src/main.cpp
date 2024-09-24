@@ -30,18 +30,18 @@ int main(int argc, char** argv)
  {
   for (size_t j = 0; j < X.front().size(); j++)
   {
-   if (X[i][j] * X[i][j] + Y[i][j] * Y[i][j] > 1.0)
-    Z[i][j] = NaN;
+    X[i][j] *= 1e8;
+    Y[i][j] *= 1e8;
+    Z[i][j] *= 1e8;
   }
  }
 
- //vector_2d mask(Z.size());
- //for (size_t i = 0; i < Z.size(); i++)
+ //for (size_t i = 0; i < X.size(); i++)
  //{
- // mask[i].resize(Z[i].size());
- // for (size_t j = 0; j < Z[i].size(); j++)
+ // for (size_t j = 0; j < X.front().size(); j++)
  // {
- //  mask[i][j] = isnan(Z[i][j]);
+ //  if (X[i][j] * X[i][j] + Y[i][j] * Y[i][j] > 1.0)
+ //   Z[i][j] = NaN;
  // }
  //}
 
@@ -50,7 +50,6 @@ int main(int argc, char** argv)
 	auto ich = ax->isocontour(X, Y, Z);
 	auto ch = ax->contour(X, Y, Z,"-k");
  ch->levels(ich->levels());
- //ax->patch(X, Y, mask);
  colormap(ax, palette::jet());
  title(ax, "Title");
  xlabel(ax, "X");
