@@ -72,8 +72,6 @@ void Colorbar::paintEvent(QPaintEvent* event)
 	for (int i = 0; i < m_levels.size(); i++)
 		ticks[i] = (m_levels[i] - m_cmin) / (m_cmax - m_cmin); 
 
-	ticks.front() = 0.00; ticks.back() = 1.00;
-
 		// Transform to pixel values
 	std::vector<double> ticks_y(m_levels.size());
 	auto y2px = Param2Px{ canvas_rect.left(),canvas_rect.top(),canvas_rect.right(),canvas_rect.bottom() };

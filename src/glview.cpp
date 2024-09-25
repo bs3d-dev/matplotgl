@@ -251,6 +251,18 @@ int GLView::height() const
 	return m_height;
 }
 
+double GLView::worldXCoord(double _x_screen)
+{
+	double sizex = (m_right - m_left);
+	return m_left + sizex * _x_screen/m_width;
+}
+
+double GLView::worldYCoord(double _y_screen)
+{
+	double sizey = (m_top - m_bottom);
+	return m_top - sizey * _y_screen/m_height;
+}
+
 void GLView::renderBegin()
 {
 	glNewList(m_tempId, GL_COMPILE);

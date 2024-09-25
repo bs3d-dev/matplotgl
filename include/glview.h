@@ -34,6 +34,9 @@ public:
 	int width() const;
 	int height() const;
 
+	double worldXCoord(double _x_screen);
+	double worldYCoord(double _y_screen);
+
 	void renderBegin();
 	void renderEnd();
 
