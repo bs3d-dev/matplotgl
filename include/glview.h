@@ -24,6 +24,7 @@ public:
 	void scaleWorldWindow(double _scaleFac);
 	void scaleWorldWindow(double _scaleFac, double _pcx, double _pcy);
 	void panWorldWindow(double _panFacX, double _panFacY);
+	void fitWorldToViewport();
 
 	double worldLeft() const;
 	double worldRight() const;
@@ -53,9 +54,13 @@ public:
 
 public slots:
 	// Mouse events slots
+	void mouseDoubleClickEvent(QMouseEvent* event);
 	void mousePressEvent(QMouseEvent* event);
 	void mouseMoveEvent(QMouseEvent* event);
 	void wheelEvent(class QWheelEvent* _event);
+
+signals:
+	void currentWorldCoord(double x, double y);
 
 
 private:
@@ -90,5 +95,8 @@ private:
 	std::vector<double> m_y_ticks;
 
 	matplot::backend::MatQt* m_backend;
+
+	bool m_is_rendering;
+	bool m_has_plot;
 
 };

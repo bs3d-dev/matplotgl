@@ -73,11 +73,10 @@ void XAxisWidget::paintEvent(QPaintEvent* event)
 		ticks_x[i] = x2px.x(ticks[i]);
 
 	//Draw tick labels
-	QRectF text_rect(ticks_rect.topRight(), QSizeF(font_max_width, font_max_height));
-	//text_rect.translate(0.00, 5.00);
+	QRectF text_rect = ticks_rect;
 	for (int i = 0; i < m_ticks.size(); i++)
 	{
-		text_rect.moveLeft(ticks_x[i] - font_max_width / 2.00);
+		text_rect.moveCenter(QPointF(ticks_x[i], text_rect.center().y()));
 		painter.drawText(text_rect, Qt::AlignTop | Qt::AlignHCenter, QString::fromStdString(m_ticks_labels[i]));
 	}
 

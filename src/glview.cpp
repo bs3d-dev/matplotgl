@@ -6,12 +6,16 @@
 
 GLView::GLView(QWidget* parent)
 	: QGLWidget(parent)
+	, m_is_rendering(false)
+	, m_has_plot(false)
+	, m_backend(nullptr)
+	, m_left(0)
+	, m_right(1)
+	, m_bottom(0)
+	, m_top(1)
 {
-	// Set bounding box
-	m_left = 0;
-	m_right = 1;
-	m_bottom = 0;
-	m_top = 1;
+	// Set mouse tracking
+	setMouseTracking(true);
 }
 
 GLView::~GLView()
@@ -54,6 +58,9 @@ void GLView::resizeGL(int _width, int _height)
 
 void GLView::paintGL()
 {
+	if (m_is_rendering)
+		return;
+
 	//Clear the buffer with the current clear color
 	glClear(GL_COLOR_BUFFER_BIT);
 	// Draw model's data
@@ -211,6 +218,22 @@ void GLView::panWorldWindow(double _panFacX, double _panFacY)
 	update();
 }
 
+void GLView::fitWorldToViewport()
+{
+	m_left = 0.0;
+	m_right = 1.0;
+	m_bottom = 0.0;
+	m_top = 1.0;
+
+	// Establish the clipping volume by setting up an
+	// orthographic projection
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
+
+	update();
+}
+
 double GLView::worldLeft() const
 {
 	return m_left;
@@ -266,11 +289,15 @@ double GLView::worldYCoord(double _y_screen)
 void GLView::renderBegin()
 {
 	glNewList(m_tempId, GL_COMPILE);
+	m_is_rendering = true;
+	m_has_plot = false;
 }
 
 void GLView::renderEnd()
 {
 	glEndList();
+	m_is_rendering = false;
+	m_has_plot = true;
 }
 
 void GLView::setBackEnd(matplot::backend::MatQt* _backend)
@@ -294,7 +321,6 @@ void GLView::setYAxis(double _min, double _max, const std::vector<double>& _tick
 
 void GLView::drawPath(const std::vector<double>& x, const std::vector<double>& y, const std::array<float, 4>& color)
 {
-
 	// Set line color
 	glColor3d(color[1], color[2], color[3]);
 
@@ -306,7 +332,6 @@ void GLView::drawPath(const std::vector<double>& x, const std::vector<double>& y
 	for (int j = 0; j < x.size(); j++)
 		glVertex2d(x[j], y[j]);
 	glEnd();
-
 }
 
 void GLView::drawMarkers(const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z)
@@ -367,6 +392,11 @@ void GLView::drawPolygon(const std::vector<double>& x, const std::vector<double>
 	glEnd();
 }
 
+void GLView::mouseDoubleClickEvent(QMouseEvent* _event)
+{
+	m_backend->mouseDoubleClickEvent(_event);
+}
+
 void GLView::mousePressEvent(QMouseEvent* _event)
 {
 	m_backend->mousePressEvent(_event);
@@ -378,9 +408,18 @@ void GLView::mousePressEvent(QMouseEvent* _event)
 
 void GLView::mouseMoveEvent(QMouseEvent* _event)
 {
+
+	if (!m_has_plot)
+		return;
+
+	QPoint pt = _event->pos();
+	double xi = worldXCoord(pt.x()); double eps = worldYCoord(pt.y());
+	double x = m_x_min + (m_x_max - m_x_min) * xi;
+	double y = m_y_min + (m_y_max - m_y_min) * eps;
+	emit currentWorldCoord(x, y);		
+
 	m_backend->mouseMoveEvent(_event);
-	
-	update();
+	update();	
 }
 
 void GLView::wheelEvent(QWheelEvent* _event)

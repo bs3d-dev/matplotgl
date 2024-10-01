@@ -90,6 +90,7 @@ namespace matplot::backend {
 		void draw_title(const std::string& _title) override;
 
 		// Mouse events slots
+		void mouseDoubleClickEvent(QMouseEvent* event);
 		void mousePressEvent(QMouseEvent* event);
 		void mouseMoveEvent(QMouseEvent* event);
 		void wheelEvent(class QWheelEvent* _event);

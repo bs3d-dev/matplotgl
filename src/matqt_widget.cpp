@@ -1,7 +1,7 @@
 #include "matqt_widget.h"
 
 MatQtWidget::MatQtWidget(QWidget* _parent)
-	: QMainWindow(_parent)
+	: QWidget(_parent)
 {
 	ui.setupUi(this);
 }

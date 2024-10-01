@@ -1,0 +1,8 @@
+matplotplusplus
+lib
+libs
+.vs
+x64
+*.user
+freeglut-3.6.0
+*.qtvscr

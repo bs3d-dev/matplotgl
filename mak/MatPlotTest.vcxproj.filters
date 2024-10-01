@@ -18,9 +18,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\glview.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -72,6 +69,9 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="..\gui\matqt_widget_.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
     <QtUic Include="..\gui\matqt_widget.ui">
       <Filter>Form Files</Filter>
     </QtUic>

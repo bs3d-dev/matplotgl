@@ -2,7 +2,7 @@
 
 #include "ui_matqt_widget.h"
 
-class MatQtWidget : public QMainWindow
+class MatQtWidget : public QWidget
 {
 
 

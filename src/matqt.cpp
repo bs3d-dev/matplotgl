@@ -6,7 +6,6 @@
 #include <future>
 #include <iostream>
 #include <matplot/core/figure_registry.h>
-#include <matplot/core/figure_type.h>
 #include <matplot/util/common.h>
 #include <thread>
 #include <QMouseEvent>
@@ -190,6 +189,18 @@ namespace matplot::backend {
 		m_widget->setTitle(_title);
 	}
 
+	void MatQt::mouseDoubleClickEvent(QMouseEvent* event)
+	{
+		Qt::MouseButton mouseButton = event->button();
+		if (mouseButton == Qt::MiddleButton)
+		{
+			// Fit canvas
+			m_widget->canvas()->fitWorldToViewport();
+			// Set new axis
+			updateAxis();
+		}
+	}
+
 	void MatQt::mousePressEvent(QMouseEvent* event)
 	{
 		m_pt0 = event->pos();
@@ -310,7 +321,7 @@ namespace matplot::backend {
 		double ymax = interp1(m_ymin, m_ymax, ctop);
 		
 		// Evaluate nice ticks
-		matplot::ticks_results results_x = matplot::calcticks(xmin, xmax);
+		matplot::ticks_results results_x = matplot::calcticks(xmin, xmax, true, 0.02*(xmax-xmin));
 		matplot::ticks_results results_y = matplot::calcticks(ymin, ymax);
 
 		// Update axis
