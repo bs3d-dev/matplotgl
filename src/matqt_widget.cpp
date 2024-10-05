@@ -30,6 +30,8 @@ void MatQtWidget::setYAxis(double y_min, double y_max, const std::vector<double>
 	ui.yAxisWidget->update();
 
 	ui.canvas->setYAxis(y_min, y_max, y_ticks);
+
+	ui.canvas->updateGL();
 }
 
 void MatQtWidget::setColorbar(double contour_min, double contour_max, const std::vector<double>& contour_levels, const std::vector<std::string>& contour_labels, int _exp)
@@ -50,6 +52,11 @@ void MatQtWidget::setYLabel(const std::string& _y_label)
 void MatQtWidget::setTitle(const std::string& _title)
 {
 	ui.titleWidget->setTitle(_title);
+}
+
+void MatQtWidget::reset()
+{
+	ui.colorbar->isEnabled(false);
 }
 
 GLView* MatQtWidget::canvas()

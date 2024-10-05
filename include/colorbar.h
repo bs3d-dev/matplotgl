@@ -14,6 +14,7 @@ public:
 	QSize sizeHint() const override;
 
 	void setContourLevels(double contour_min, double contour_max, const std::vector<double>& contour_levels, const std::vector<std::string>& contour_labels, int _exp);
+	void isEnabled(bool _check);
 
 protected:
 	void paintEvent(QPaintEvent* event) override;
@@ -25,6 +26,7 @@ private:
 	std::vector<double> m_levels;
 	std::vector<std::string> m_levels_labels;
 	int m_exp;
+	bool m_enabled;
 
 	QPen pen;
 	QBrush brush;

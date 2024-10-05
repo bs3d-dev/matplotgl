@@ -18,12 +18,13 @@ int main(int argc, char** argv)
 
  std::vector<double> x = linspace(0, 2 * pi);
  std::vector<double> y = transform(x, [](auto x) { return sin(x); });
+ std::vector<double> y2 = transform(x, [](auto x) { return cos(x); });
 
  auto b = create_backend<matplot::backend::MatQt>(&window);
  auto f = figure_no_backend(true); f->backend(b);
  auto ax = f->current_axes();
 
- auto [X, Y, Z] = peaks();
+ /*auto [X, Y, Z] = peaks();
 
  for (size_t i = 0; i < X.size(); i++)
  {
@@ -33,7 +34,7 @@ int main(int argc, char** argv)
     Y[i][j] *= 1e8;
     Z[i][j] *= 1e8;
   }
- }
+ }*/
 
  //for (size_t i = 0; i < X.size(); i++)
  //{
@@ -44,15 +45,16 @@ int main(int argc, char** argv)
  // }
  //}
 
- //ax->plot(x, y, "-");
  ax->hold(on);
-	auto ich = ax->isocontour(X, Y, Z);
-	auto ch = ax->contour(X, Y, Z,"-k");
- ch->levels(ich->levels());
- colormap(ax, palette::jet());
- title(ax, "Title");
- xlabel(ax, "X");
- ylabel(ax, "Y");
+ ax->plot(x, y, "-");
+ ax->plot(x, y2, "-");
+	//auto ich = ax->isocontour(X, Y, Z);
+	//auto ch = ax->contour(X, Y, Z,"-k");
+ //ch->levels(ich->levels());
+ //colormap(ax, palette::jet());
+ //title(ax, "Title");
+ //xlabel(ax, "X");
+ //ylabel(ax, "Y");
  //ax->cblim({ -6,6 });
  
   //Start rendering

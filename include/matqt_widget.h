@@ -20,6 +20,8 @@ public:
 	void setYLabel(const std::string& _y_label);
 	void setTitle(const std::string& _title);
 
+	void reset();
+
 	GLView* canvas();
 
 

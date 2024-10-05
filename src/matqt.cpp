@@ -15,6 +15,8 @@ namespace matplot::backend {
 
 	MatQt::MatQt(MatQtWidget* _widget)
 		: m_widget(_widget)
+		, m_x_reverse(false)
+		, m_y_reverse(false)
 	{
 		m_widget->canvas()->setBackEnd(this);
 	}
@@ -75,6 +77,7 @@ namespace matplot::backend {
 	}
 
 	bool MatQt::new_frame() {
+		m_widget->reset();
 		m_widget->canvas()->renderBegin();
 		return true;
 	}
@@ -161,13 +164,17 @@ namespace matplot::backend {
 		m_widget->canvas()->drawPolygon(x, y, color);
 	}
 
-	void MatQt::draw_axis(double x_min, double x_max, double y_min, double y_max)
+	void MatQt::draw_axis(double x_min, double x_max, double y_min, double y_max, bool x_reverse, bool y_reverse)
 	{
 		// Store limits
 		m_xmin = x_min;
 		m_xmax = x_max;
 		m_ymin = y_min;
 		m_ymax = y_max;
+
+		// Store directions
+		m_x_reverse = x_reverse;
+		m_y_reverse = y_reverse;
 
 		updateAxis();
 	}
@@ -344,13 +351,25 @@ namespace matplot::backend {
 		matplot::ticks_results results_x = matplot::calcticks(xmin, xmax, true, 0.02*(xmax-xmin));
 		matplot::ticks_results results_y = matplot::calcticks(ymin, ymax);
 
+		if (m_x_reverse)
+		{
+			for (double& x : results_x.ticks)
+				x = xmax - x;
+
+			std::reverse(results_x.tickLabels.begin(), results_x.tickLabels.end());
+		}
+
+		if (m_y_reverse)
+		{
+			for (double& y : results_y.ticks)
+				y = ymax - y;
+
+			std::reverse(results_y.tickLabels.begin(), results_y.tickLabels.end());
+		}
+
 		// Update axis
 		m_widget->setXAxis(xmin, xmax, results_x.ticks, results_x.tickLabels, results_x.expDec);
 		m_widget->setYAxis(ymin, ymax, results_y.ticks, results_y.tickLabels, results_y.expDec);
-		m_widget->canvas()->setXAxis(xmin, xmax, results_x.ticks);
-		m_widget->canvas()->setYAxis(ymin, ymax, results_y.ticks);
-
-		m_widget->canvas()->updateGL();
 	}
 
 } // namespace matplot::backend

@@ -424,9 +424,7 @@ void GLView::mouseMoveEvent(QMouseEvent* _event)
 
 	QPoint pt = _event->pos();
 	double xi = worldXCoord(pt.x()); double eps = worldYCoord(pt.y());
-	double x = xi < 0 ? m_x_min : xi > 1 ? m_x_max : m_x_min + (m_x_max - m_x_min) * xi;
-	double y = eps < 0 ? m_y_min : eps > 1 ? m_y_max : m_y_min + (m_y_max - m_y_min) * eps;
-	emit currentWorldCoord(x, y);		
+	emit currentWorldCoord(xi, eps);		
 
 	m_backend->mouseMoveEvent(_event);
 	update();	

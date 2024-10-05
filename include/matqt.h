@@ -83,7 +83,7 @@ namespace matplot::backend {
 			const std::vector<double>& y,
 			const std::array<float, 4>& color) override;
 
-		void draw_axis(double x_min, double x_max, double y_min, double y_max) override;
+		void draw_axis(double x_min, double x_max, double y_min, double y_max, bool x_reverse, bool y_reverse) override;
 
 		void draw_colorbar(double contour_min, double contour_max) override;
 		void draw_labels(const std::string& x_label, const std::string& y_label) override;
@@ -107,6 +107,9 @@ namespace matplot::backend {
 		double m_xmax;
 		double m_ymin;
 		double m_ymax;
+		// Axes directions
+		bool m_x_reverse;
+		bool m_y_reverse;
 
 		// QPoint is a Qt class that defines a point in a plane
 		// i.e. the position of the mouse on the canvas.

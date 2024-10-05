@@ -9,6 +9,7 @@ Colorbar::Colorbar(QWidget* parent)
 	, m_left_margin(0.00)
 	, m_top_margin(30.00)
 	, m_bottom_margin(10.00)
+	, m_enabled(false)
 {
 	pen = QPen(Qt::black, 0.00, Qt::PenStyle::SolidLine, Qt::PenCapStyle::FlatCap, Qt::PenJoinStyle::BevelJoin);
 }
@@ -29,17 +30,27 @@ QSize Colorbar::sizeHint() const
 
 void Colorbar::setContourLevels(double contour_min, double contour_max, const std::vector<double>& contour_levels, const std::vector<std::string>& contour_labels, int _exp)
 {
+
 	m_cmin = contour_min;
 	m_cmax = contour_max;
 	m_levels = contour_levels;
 	m_levels_labels = contour_labels;
 	m_exp = _exp;
+	m_enabled = true;
 
 	update();
 }
 
+void Colorbar::isEnabled(bool _check)
+{
+	m_enabled = _check;
+}
+
 void Colorbar::paintEvent(QPaintEvent* event)
 {
+
+	if (!m_enabled)
+		return;
 
 	Colormap::Jet colormap;
 
