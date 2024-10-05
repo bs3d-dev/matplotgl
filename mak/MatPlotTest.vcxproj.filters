@@ -69,9 +69,6 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="..\gui\matqt_widget_.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
     <QtUic Include="..\gui\matqt_widget.ui">
       <Filter>Form Files</Filter>
     </QtUic>

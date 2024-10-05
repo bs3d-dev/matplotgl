@@ -9,6 +9,7 @@
 #include <matplot/util/common.h>
 #include <thread>
 #include <QMouseEvent>
+#include "..\include\matqt.h"
 
 namespace matplot::backend {
 
@@ -173,6 +174,21 @@ namespace matplot::backend {
 
 	void MatQt::draw_colorbar(double contour_min, double contour_max)
 	{
+
+		if (isnan(contour_min) || isnan(contour_max))
+		{
+			m_widget->setColorbar(contour_min, contour_max, {}, {}, 0);
+			return;
+		}			
+
+		if (contour_min == contour_max)
+		{
+			if (contour_min < 0)
+				contour_max = 0.99 * contour_min;
+			else
+				contour_max = 1.01 * contour_min;
+		}
+
 		ticks_results cticks_results = calcticks(contour_min, contour_max);
 
 		m_widget->setColorbar(contour_min, contour_max,cticks_results.ticks,cticks_results.tickLabels,cticks_results.expDec);
@@ -216,6 +232,10 @@ namespace matplot::backend {
 		//		break;
 		//	}
 		//}
+	}
+
+	void MatQt::mouseReleaseEvent(QMouseEvent* event)
+	{
 	}
 
 	void MatQt::mouseMoveEvent(QMouseEvent* event)

@@ -338,7 +338,6 @@
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="..\gui\matqt_widget.ui" />
-    <QtUic Include="..\gui\matqt_widget_.ui" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(QtMsBuild)\qt.targets" Condition="Exists('$(QtMsBuild)\qt.targets')" />

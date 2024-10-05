@@ -3,6 +3,7 @@
 #include "matqt.h"
 #include <array>
 #include "util.h"
+#include "..\include\glview.h"
 
 GLView::GLView(QWidget* parent)
 	: QGLWidget(parent)
@@ -406,6 +407,15 @@ void GLView::mousePressEvent(QMouseEvent* _event)
 		setCursor(Qt::ClosedHandCursor);
 }
 
+void GLView::mouseReleaseEvent(QMouseEvent* _event)
+{
+	m_backend->mouseReleaseEvent(_event);
+
+	Qt::MouseButton mouseButton = _event->button();
+	if (mouseButton == Qt::MiddleButton)
+		setCursor(Qt::ArrowCursor);
+}
+
 void GLView::mouseMoveEvent(QMouseEvent* _event)
 {
 
@@ -414,8 +424,8 @@ void GLView::mouseMoveEvent(QMouseEvent* _event)
 
 	QPoint pt = _event->pos();
 	double xi = worldXCoord(pt.x()); double eps = worldYCoord(pt.y());
-	double x = m_x_min + (m_x_max - m_x_min) * xi;
-	double y = m_y_min + (m_y_max - m_y_min) * eps;
+	double x = xi < 0 ? m_x_min : xi > 1 ? m_x_max : m_x_min + (m_x_max - m_x_min) * xi;
+	double y = eps < 0 ? m_y_min : eps > 1 ? m_y_max : m_y_min + (m_y_max - m_y_min) * eps;
 	emit currentWorldCoord(x, y);		
 
 	m_backend->mouseMoveEvent(_event);

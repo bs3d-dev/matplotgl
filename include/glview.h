@@ -56,6 +56,7 @@ public slots:
 	// Mouse events slots
 	void mouseDoubleClickEvent(QMouseEvent* event);
 	void mousePressEvent(QMouseEvent* event);
+	void mouseReleaseEvent(QMouseEvent* event);
 	void mouseMoveEvent(QMouseEvent* event);
 	void wheelEvent(class QWheelEvent* _event);
 
