@@ -29,6 +29,7 @@ void GLView::initializeGL()
 	glClearColor(1.0,1.0,1.0,1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	m_plotId = glGenLists(1);
 	m_tempId = glGenLists(1);
 }
 
@@ -64,6 +65,8 @@ void GLView::paintGL()
 
 	//Clear the buffer with the current clear color
 	glClear(GL_COLOR_BUFFER_BIT);
+	// Draw model's data
+	glCallList(m_plotId);
 	// Draw model's data
 	glCallList(m_tempId);
 
@@ -289,7 +292,7 @@ double GLView::worldYCoord(double _y_screen)
 
 void GLView::renderBegin()
 {
-	glNewList(m_tempId, GL_COMPILE);
+	glNewList(m_plotId, GL_COMPILE);
 	m_is_rendering = true;
 	m_has_plot = false;
 }
@@ -299,6 +302,18 @@ void GLView::renderEnd()
 	glEndList();
 	m_is_rendering = false;
 	m_has_plot = true;
+}
+
+void GLView::tempBegin()
+{
+	glNewList(m_tempId, GL_COMPILE);
+	m_is_rendering = true;
+}
+
+void GLView::tempEnd()
+{
+	glEndList();
+	m_is_rendering = false;
 }
 
 void GLView::setBackEnd(matplot::backend::MatQt* _backend)
@@ -419,15 +434,15 @@ void GLView::mouseReleaseEvent(QMouseEvent* _event)
 void GLView::mouseMoveEvent(QMouseEvent* _event)
 {
 
+	m_backend->mouseMoveEvent(_event);
+	update();
+
 	if (!m_has_plot)
 		return;
 
 	QPoint pt = _event->pos();
 	double xi = worldXCoord(pt.x()); double eps = worldYCoord(pt.y());
 	emit currentWorldCoord(xi, eps);		
-
-	m_backend->mouseMoveEvent(_event);
-	update();	
 }
 
 void GLView::wheelEvent(QWheelEvent* _event)

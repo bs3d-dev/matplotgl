@@ -41,6 +41,9 @@ public:
 	void renderBegin();
 	void renderEnd();
 
+	void tempBegin();
+	void tempEnd();
+
 	void setBackEnd(matplot::backend::MatQt* _backend);
 
 	void setXAxis(double _min, double _max, const std::vector<double>& _ticks);
@@ -84,6 +87,7 @@ private:
 	GLdouble m_top;            // top limit of object space window
 
 	// Display lists
+	GLuint m_plotId;           // GL list index for temp display
 	GLuint m_tempId;           // GL list index for temp display
 
 	// Axis data
@@ -99,5 +103,7 @@ private:
 
 	bool m_is_rendering;
 	bool m_has_plot;
+
+
 
 };

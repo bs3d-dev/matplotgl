@@ -17,6 +17,8 @@ namespace matplot::backend {
 		: m_widget(_widget)
 		, m_x_reverse(false)
 		, m_y_reverse(false)
+		, m_mouseMoveTol(10)
+		, m_is_collecting_line(true)
 	{
 		m_widget->canvas()->setBackEnd(this);
 	}
@@ -228,21 +230,39 @@ namespace matplot::backend {
 	{
 		m_pt0 = event->pos();
 		Qt::MouseButton mouseButton = event->button();
-		//if (mouseButton == Qt::LeftButton)
-		//{
-		//	switch (m_curMouseAction)
-		//	{
-		//	case GLView::ZOOMDRAG:
-		//		m_pt2 = m_pt0; //TODO: remove
-		//		break;
-		//	default:
-		//		break;
-		//	}
-		//}
 	}
 
 	void MatQt::mouseReleaseEvent(QMouseEvent* event)
 	{
+		// Get current mouse position
+		m_pt1 = event->pos();
+
+		Qt::MouseButton mouseButton = event->button();
+		if (mouseButton == Qt::LeftButton)
+		{
+			if (m_is_collecting_line)
+			{
+				// Only consider current point if left mouse point was used and
+				// if it is on the same location of button press point.
+				if ((abs(m_pt0.x() - m_pt1.x()) <= m_mouseMoveTol) &&
+					(abs(m_pt0.y() - m_pt1.y()) <= m_mouseMoveTol))
+				{
+					if (m_is_first_pt)
+					{
+						m_line_x0 = m_widget->canvas()->worldXCoord(m_pt1.x());
+						m_line_y0 = m_widget->canvas()->worldYCoord(m_pt1.y());
+						m_is_first_pt = false;
+					}						
+					else
+					{
+						m_line_x1 = m_widget->canvas()->worldXCoord(m_pt1.x());
+						m_line_y1 = m_widget->canvas()->worldYCoord(m_pt1.y());
+						m_is_collecting_line = false;
+						m_is_first_pt = true;
+					}
+				}					
+			}			
+		}
 	}
 
 	void MatQt::mouseMoveEvent(QMouseEvent* event)
@@ -251,36 +271,6 @@ namespace matplot::backend {
 		// Get current mouse position
 		m_pt1 = event->pos();
 		Qt::MouseButtons mouseButton = event->buttons();
-
-		// Treat mouse move event according to current mouse action type
-		//if (mouseButton & Qt::LeftButton)
-		//{
-		//	switch (m_curMouseAction)
-		//	{
-		//	case GLView::ZOOMDRAG:
-		//	{
-		//		QPoint delta = m_pt1 - m_pt2;
-		//		double dY = delta.y();
-		//		double scl;
-		//		scl = 1.0 + dY / (double)m_height;
-		//		scaleWorldWindow(scl, (double)m_pt0.x() / (double)m_width, 1.0 - (double)m_pt0.y() / (double)m_height);
-		//		m_pt2 = m_pt1;
-		//		break;
-		//	}
-		//	case GLView::SELECTION:
-		//	{
-		//		drawSelectionFence();
-		//		break;
-		//	}
-		//	case GLView::ZOOMWINDOW:
-		//	{
-		//		drawZoomWindow();
-		//		break;
-		//	}
-		//	default:
-		//		break;
-		//	}
-		//}
 		if (mouseButton & Qt::MiddleButton)
 		{
 			// Pan canvas
@@ -295,30 +285,27 @@ namespace matplot::backend {
 			// Store last point
 			m_pt0 = m_pt1;
 		}
-		//else if (mouseButton & Qt::RightButton)
-		//{
-
-		//}
-		//else //if (mouseButton & Qt::NoButton)
-		//{
-		//	// Only consider current point if left mouse button was used,
-		//	// if not button pressed, and if current point is not at the
-		//	// same location of button press point.
-		//	if ((ABS(m_pt0.x() - m_pt1.x()) > m_mouseMoveTol) ||
-		//		(ABS(m_pt0.y() - m_pt1.y()) > m_mouseMoveTol))
-		//	{
-		//		if (m_glController->isCollectingCurve())
-		//		{
-		//			// Convert current mouse position point to world coordinates
-		//			QPointF pt1W = convertPtCoordsToUniverse(m_pt1);
-		//			double xW = pt1W.x();
-		//			double yW = pt1W.y();
-		//			snapPoint(&xW, &yW);
-		//			// Add point as a temporary point for curve collection.
-		//			m_glController->mouseMoveEvent(xW, yW);
-		//		}
-		//	}
-		//}
+		else/* if (mouseButton & Qt::NoButton)*/
+		{
+			// Only consider current point if left mouse button was used,
+			// if not button pressed, and if current point is not at the
+			// same location of button press point.
+			if ((abs(m_pt0.x() - m_pt1.x()) > m_mouseMoveTol) ||
+				(abs(m_pt0.y() - m_pt1.y()) > m_mouseMoveTol))
+			{
+				if (m_is_collecting_line && !m_is_first_pt)
+				{
+					// Convert current mouse position point to world coordinates
+					m_line_xtemp = m_widget->canvas()->worldXCoord(m_pt1.x());
+					m_line_ytemp = m_widget->canvas()->worldYCoord(m_pt1.y());
+					// Render temp line
+					m_widget->canvas()->tempBegin();
+					draw_path({ m_line_x0,m_line_xtemp }, { m_line_y0,m_line_ytemp }, { 0, 0, 0, 0 });
+					m_widget->canvas()->tempEnd();
+					m_widget->canvas()->update();
+				}
+			}
+		}
 	}
 
 	void MatQt::wheelEvent(QWheelEvent* _event)
@@ -353,9 +340,11 @@ namespace matplot::backend {
 
 		if (m_x_reverse)
 		{
+
 			for (double& x : results_x.ticks)
 				x = xmax - x;
 
+			std::reverse(results_x.ticks.begin(), results_x.ticks.end());
 			std::reverse(results_x.tickLabels.begin(), results_x.tickLabels.end());
 		}
 
@@ -364,6 +353,7 @@ namespace matplot::backend {
 			for (double& y : results_y.ticks)
 				y = ymax - y;
 
+			std::reverse(results_y.ticks.begin(), results_y.ticks.end());
 			std::reverse(results_y.tickLabels.begin(), results_y.tickLabels.end());
 		}
 

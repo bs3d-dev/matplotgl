@@ -107,9 +107,14 @@ namespace matplot::backend {
 		double m_xmax;
 		double m_ymin;
 		double m_ymax;
+
 		// Axes directions
 		bool m_x_reverse;
 		bool m_y_reverse;
+
+		// Curve collection directions
+		bool m_is_collecting_line;		
+		bool m_is_first_pt;		
 
 		// QPoint is a Qt class that defines a point in a plane
 		// i.e. the position of the mouse on the canvas.
@@ -117,6 +122,13 @@ namespace matplot::backend {
 		QPoint m_pt1;             // current mouse position
 		QPoint m_pt2;             // previous mouse position
 		int m_mouseMoveTol;       // tolerance for mouse move
+
+		double m_line_x0;
+		double m_line_x1;
+		double m_line_y0;
+		double m_line_y1;
+		double m_line_xtemp;
+		double m_line_ytemp;
 
 	};
 } // namespace matplot::backend
