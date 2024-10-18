@@ -19,6 +19,8 @@ public:
 	void setXLabel(const std::string& _x_label);
 	void setYLabel(const std::string& _y_label);
 	void setTitle(const std::string& _title);
+	void pointCollected(double x, double y);
+	void lineCollected(double x0, double y0, double x1, double y1);
 
 	void reset();
 
@@ -27,6 +29,21 @@ public:
 
 private:
 	Ui::MatQtWidget ui;
+
+public:
+	class Observer
+	{
+	public:
+		virtual void lineCollected(double x0, double y0, double x1, double y1) = 0;
+		virtual void pointCollected(double x, double y) = 0;
+	};
+
+public:
+	void attachObserver(Observer* _entry) { m_observers.push_back(_entry); };
+	void clearObservers() { m_observers.clear(); };
+
+private:
+	std::list<Observer*> m_observers;
 
 };
 

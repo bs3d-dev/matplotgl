@@ -316,6 +316,16 @@ void GLView::tempEnd()
 	m_is_rendering = false;
 }
 
+void GLView::beginWellCollection()
+{
+	m_backend->begin_point_collection();
+}
+
+void GLView::beginLineCollection()
+{
+	m_backend->begin_line_collection();
+}
+
 void GLView::setBackEnd(matplot::backend::MatQt* _backend)
 {
 	m_backend = _backend;

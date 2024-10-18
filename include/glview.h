@@ -44,6 +44,9 @@ public:
 	void tempBegin();
 	void tempEnd();
 
+	void beginWellCollection();
+	void beginLineCollection();
+
 	void setBackEnd(matplot::backend::MatQt* _backend);
 
 	void setXAxis(double _min, double _max, const std::vector<double>& _ticks);

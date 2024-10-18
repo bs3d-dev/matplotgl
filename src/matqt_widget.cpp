@@ -52,11 +52,29 @@ void MatQtWidget::setYLabel(const std::string& _y_label)
 void MatQtWidget::setTitle(const std::string& _title)
 {
 	ui.titleWidget->setTitle(_title);
+	ui.titleWidget->update();
+}
+
+void MatQtWidget::pointCollected(double x, double y)
+{
+	for (auto observer : m_observers )
+	{
+		observer->pointCollected(x, y);
+	}
+}
+
+void MatQtWidget::lineCollected(double x0, double y0, double x1, double y1)
+{
+	for (auto observer : m_observers )
+	{
+		observer->lineCollected(x0, y0, x1, y1);
+	}
 }
 
 void MatQtWidget::reset()
 {
 	ui.colorbar->isEnabled(false);
+	ui.colorbar->update();
 }
 
 GLView* MatQtWidget::canvas()

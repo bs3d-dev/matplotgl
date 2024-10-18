@@ -109,7 +109,7 @@ void XAxisWidget::paintEvent(QPaintEvent* event)
 
 	// Draw label
 	QRectF label_rect(ticks_rect.topLeft(), rect().bottomRight());
-	painter.drawText(label_rect, Qt::AlignCenter, QString::fromStdString(m_label));
+	painter.drawText(label_rect, Qt::AlignCenter, QString::fromLatin1(m_label.c_str()));
 
 }
 
@@ -185,7 +185,7 @@ void YAxisWidget::paintEvent(QPaintEvent* event)
 	QRectF label_rect(ticks_rect.topLeft(), QPointF(text_rect.left(), ticks_rect.bottom()));
 	painter.translate(label_rect.center());
 	painter.rotate(-90);
-	painter.drawText(0, 0, QString::fromStdString(m_label));
+	painter.drawText(0, 0, QString::fromLatin1(m_label.c_str()));
 	painter.rotate(90);
 
 }

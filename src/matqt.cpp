@@ -18,7 +18,8 @@ namespace matplot::backend {
 		, m_x_reverse(false)
 		, m_y_reverse(false)
 		, m_mouseMoveTol(10)
-		, m_is_collecting_line(true)
+		, m_is_collecting_line(false)
+		, m_is_collecting_point(false)
 	{
 		m_widget->canvas()->setBackEnd(this);
 	}
@@ -214,6 +215,18 @@ namespace matplot::backend {
 		m_widget->setTitle(_title);
 	}
 
+	void MatQt::begin_point_collection()
+	{
+		m_is_collecting_point = true;
+		m_is_collecting_line = false;
+	}
+
+	void MatQt::begin_line_collection()
+	{
+		m_is_collecting_line = true;
+		m_is_collecting_point = false;
+	}
+
 	void MatQt::mouseDoubleClickEvent(QMouseEvent* event)
 	{
 		Qt::MouseButton mouseButton = event->button();
@@ -257,11 +270,28 @@ namespace matplot::backend {
 					{
 						m_line_x1 = m_widget->canvas()->worldXCoord(m_pt1.x());
 						m_line_y1 = m_widget->canvas()->worldYCoord(m_pt1.y());
+						m_widget->canvas()->tempBegin();
+						m_widget->canvas()->tempEnd();
+						m_widget->canvas()->update();
 						m_is_collecting_line = false;
 						m_is_first_pt = true;
+						m_widget->lineCollected(m_line_x0, m_line_y0, m_line_x1, m_line_y1);
 					}
 				}					
 			}			
+			else if (m_is_collecting_point)
+			{
+				// Only consider current point if left mouse point was used and
+				// if it is on the same location of button press point.
+				if ((abs(m_pt0.x() - m_pt1.x()) <= m_mouseMoveTol) &&
+					(abs(m_pt0.y() - m_pt1.y()) <= m_mouseMoveTol))
+				{
+						m_pt_x = m_widget->canvas()->worldXCoord(m_pt1.x());
+						m_pt_y = m_widget->canvas()->worldYCoord(m_pt1.y());
+						m_is_collecting_line = false;
+						m_widget->pointCollected(m_pt_x, m_pt_y);
+				}
+			}
 		}
 	}
 

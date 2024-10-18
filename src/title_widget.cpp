@@ -19,5 +19,5 @@ void TitleWidget::setTitle(const std::string& _label)
 void TitleWidget::paintEvent(QPaintEvent* _event)
 {
 	QPainter painter(this);
-	painter.drawText(rect(), Qt::AlignCenter, QString::fromStdString(m_label));
+	painter.drawText(rect(), Qt::AlignCenter, QString::fromLatin1(m_label.c_str()));
 }

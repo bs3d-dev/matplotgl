@@ -22,6 +22,7 @@ class MatQtWidget;
 
 namespace matplot::backend {
 	class MATPLOT_EXPORTS MatQt : public backend_interface {
+
 	public:
 		MatQt(MatQtWidget* _widget);
 		~MatQt();
@@ -89,6 +90,9 @@ namespace matplot::backend {
 		void draw_labels(const std::string& x_label, const std::string& y_label) override;
 		void draw_title(const std::string& _title) override;
 
+		void begin_point_collection();
+		void begin_line_collection();
+
 		// Mouse events slots
 		void mouseDoubleClickEvent(QMouseEvent* event);
 		void mousePressEvent(QMouseEvent* event);
@@ -113,6 +117,7 @@ namespace matplot::backend {
 		bool m_y_reverse;
 
 		// Curve collection directions
+		bool m_is_collecting_point;
 		bool m_is_collecting_line;		
 		bool m_is_first_pt;		
 
@@ -123,14 +128,18 @@ namespace matplot::backend {
 		QPoint m_pt2;             // previous mouse position
 		int m_mouseMoveTol;       // tolerance for mouse move
 
+		double m_pt_x;
+		double m_pt_y;
 		double m_line_x0;
 		double m_line_x1;
 		double m_line_y0;
 		double m_line_y1;
 		double m_line_xtemp;
 		double m_line_ytemp;
-
 	};
+
+
+
 } // namespace matplot::backend
 
 #endif // MATPLOTPLUSPLUS_OPENGL_EMBED_H
