@@ -292,6 +292,7 @@ double GLView::worldYCoord(double _y_screen)
 
 void GLView::renderBegin()
 {
+	this->makeCurrent();
 	glNewList(m_plotId, GL_COMPILE);
 	m_is_rendering = true;
 	m_has_plot = false;
@@ -302,6 +303,7 @@ void GLView::renderEnd()
 	glEndList();
 	m_is_rendering = false;
 	m_has_plot = true;
+	this->doneCurrent();
 }
 
 void GLView::tempBegin()
