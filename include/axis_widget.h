@@ -33,7 +33,6 @@ protected:
 	std::string m_label;
 	QPen pen;
 	int m_canvas_margin;
-	//QBrush brush;
 
 };
 

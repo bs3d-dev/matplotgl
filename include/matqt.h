@@ -89,6 +89,7 @@ namespace matplot::backend {
 		void draw_colorbar(double contour_min, double contour_max) override;
 		void draw_labels(const std::string& x_label, const std::string& y_label) override;
 		void draw_title(const std::string& _title) override;
+		void	draw_legends(const std::vector<std::string>& labels, const std::vector<line_spec>& line_specs);
 
 		void begin_point_collection();
 		void begin_line_collection();

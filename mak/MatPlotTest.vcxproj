@@ -322,6 +322,7 @@
     <ClCompile Include="..\src\colorbar.cpp" />
     <ClCompile Include="..\src\colormap.cpp" />
     <ClCompile Include="..\src\glview.cpp" />
+    <ClCompile Include="..\src\legend_box.cpp" />
     <ClCompile Include="..\src\matqt.cpp" />
     <ClCompile Include="..\src\matqt_widget.cpp" />
     <ClCompile Include="..\src\title_widget.cpp" />
@@ -331,6 +332,7 @@
     <ClInclude Include="..\include\axis_widget.h" />
     <ClInclude Include="..\include\colorbar.h" />
     <ClInclude Include="..\include\colormap.h" />
+    <ClInclude Include="..\include\legend_box.h" />
     <ClInclude Include="..\include\matqt.h" />
     <ClInclude Include="..\include\matqt_widget.h" />
     <ClInclude Include="..\include\title_widget.h" />

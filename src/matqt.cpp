@@ -215,6 +215,11 @@ namespace matplot::backend {
 		m_widget->setTitle(_title);
 	}
 
+	void MatQt::draw_legends(const std::vector<std::string>& labels, const std::vector<line_spec>& line_specs)
+	{
+		m_widget->setLegends(labels, line_specs);
+	}
+
 	void MatQt::begin_point_collection()
 	{
 		m_is_collecting_point = true;

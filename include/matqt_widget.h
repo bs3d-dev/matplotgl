@@ -2,6 +2,12 @@
 
 #include "ui_matqt_widget.h"
 
+namespace matplot
+{
+	class line_spec;
+}
+
+
 class MatQtWidget : public QWidget
 {
 
@@ -19,6 +25,7 @@ public:
 	void setXLabel(const std::string& _x_label);
 	void setYLabel(const std::string& _y_label);
 	void setTitle(const std::string& _title);
+	void setLegends(const std::vector<std::string>& labels, const std::vector<matplot::line_spec>& line_specs);
 	void pointCollected(double x, double y);
 	void lineCollected(double x0, double y0, double x1, double y1);
 

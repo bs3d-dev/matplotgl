@@ -48,6 +48,8 @@ int main(int argc, char** argv)
  ax->hold(on);
  ax->plot(x, y, "-");
  ax->plot(x, y2, "-");
+
+ ax->legend({ "Sin","Cos" });
 	//auto ich = ax->isocontour(X, Y, Z);
 	//auto ch = ax->contour(X, Y, Z,"-k");
  //ch->levels(ich->levels());
