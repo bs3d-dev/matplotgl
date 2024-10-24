@@ -20,6 +20,7 @@ namespace matplot::backend {
 		, m_mouseMoveTol(10)
 		, m_is_collecting_line(false)
 		, m_is_collecting_point(false)
+		, m_is_first_pt(false)
 	{
 		m_widget->canvas()->setBackEnd(this);
 	}
@@ -222,13 +223,14 @@ namespace matplot::backend {
 
 	void MatQt::begin_point_collection()
 	{
-		m_is_collecting_point = true;
+		m_is_collecting_point = true;		
 		m_is_collecting_line = false;
 	}
 
 	void MatQt::begin_line_collection()
 	{
 		m_is_collecting_line = true;
+		m_is_first_pt = true;
 		m_is_collecting_point = false;
 	}
 
@@ -293,7 +295,7 @@ namespace matplot::backend {
 				{
 						m_pt_x = m_widget->canvas()->worldXCoord(m_pt1.x());
 						m_pt_y = m_widget->canvas()->worldYCoord(m_pt1.y());
-						m_is_collecting_line = false;
+						m_is_collecting_point = false;
 						m_widget->pointCollected(m_pt_x, m_pt_y);
 				}
 			}
