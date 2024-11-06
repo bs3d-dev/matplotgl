@@ -8,6 +8,7 @@ AxisWidget::AxisWidget(QWidget* _parent)
 	: QWidget(_parent)
 	, m_max(0.00)
 	, m_min(0.00)
+	, m_exp(0)
 	, m_canvas_margin(10.0)
 {
 	pen = QPen(Qt::black, 0.00, Qt::PenStyle::SolidLine, Qt::PenCapStyle::FlatCap, Qt::PenJoinStyle::BevelJoin);

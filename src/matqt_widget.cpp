@@ -4,9 +4,7 @@ MatQtWidget::MatQtWidget(QWidget* _parent)
 	: QWidget(_parent)
 {
 	ui.setupUi(this);
-
-	ui.colorbar->setVisible(false);
-	ui.legendBoxWidget->setVisible(false);
+	reset();
 }
 
 MatQtWidget::~MatQtWidget()
@@ -34,14 +32,14 @@ void MatQtWidget::setYAxis(double y_min, double y_max, const std::vector<double>
 
 	ui.canvas->setYAxis(y_min, y_max, y_ticks);
 
-	ui.canvas->updateGL();
+	ui.canvas->update();
 }
 
 void MatQtWidget::setColorbar(double contour_min, double contour_max, const std::vector<double>& contour_levels, const std::vector<std::string>& contour_labels, int _exp)
 {
-	ui.colorbar->setVisible(true);
 	ui.colorbar->setContourLevels(contour_min, contour_max, contour_levels, contour_labels, _exp);
 	ui.colorbar->update();
+	ui.colorbar->setVisible(true);
 }
 
 void MatQtWidget::setXLabel(const std::string& _x_label)
@@ -62,10 +60,10 @@ void MatQtWidget::setTitle(const std::string& _title)
 
 void MatQtWidget::setLegends(const std::vector<std::string>& labels, const std::vector<matplot::line_spec>& line_specs)
 {
-	ui.legendBoxWidget->setVisible(true);
 	ui.legendBoxWidget->setLabels(labels);
 	ui.legendBoxWidget->setLineSpecs(line_specs);
 	ui.legendBoxWidget->update();
+	ui.legendBoxWidget->setVisible(true);
 }
 
 void MatQtWidget::pointCollected(double x, double y)
@@ -93,4 +91,9 @@ void MatQtWidget::reset()
 GLView* MatQtWidget::canvas()
 {
 	return ui.canvas;
+}
+
+void MatQtWidget::openConfigurations()
+{
+
 }

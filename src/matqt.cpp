@@ -9,7 +9,6 @@
 #include <matplot/util/common.h>
 #include <thread>
 #include <QMouseEvent>
-#include "..\include\matqt.h"
 
 namespace matplot::backend {
 
@@ -200,7 +199,7 @@ namespace matplot::backend {
 				contour_max = 1.01 * contour_min;
 		}
 
-		ticks_results cticks_results = calcticks(contour_min, contour_max);
+		matplot::ticks_results cticks_results = matplot::calcticks(contour_min, contour_max);
 
 		m_widget->setColorbar(contour_min, contour_max,cticks_results.ticks,cticks_results.tickLabels,cticks_results.expDec);
 	}
@@ -225,6 +224,7 @@ namespace matplot::backend {
 	{
 		m_is_collecting_point = true;		
 		m_is_collecting_line = false;
+		m_widget->setCursor(Qt::CrossCursor);
 	}
 
 	void MatQt::begin_line_collection()
@@ -232,6 +232,7 @@ namespace matplot::backend {
 		m_is_collecting_line = true;
 		m_is_first_pt = true;
 		m_is_collecting_point = false;
+		m_widget->setCursor(Qt::CrossCursor);
 	}
 
 	void MatQt::mouseDoubleClickEvent(QMouseEvent* event)
@@ -241,8 +242,6 @@ namespace matplot::backend {
 		{
 			// Fit canvas
 			m_widget->canvas()->fitWorldToViewport();
-			// Set new axis
-			updateAxis();
 		}
 	}
 
@@ -283,6 +282,7 @@ namespace matplot::backend {
 						m_is_collecting_line = false;
 						m_is_first_pt = true;
 						m_widget->lineCollected(m_line_x0, m_line_y0, m_line_x1, m_line_y1);
+						m_widget->setCursor(Qt::ArrowCursor);
 					}
 				}					
 			}			
@@ -297,6 +297,7 @@ namespace matplot::backend {
 						m_pt_y = m_widget->canvas()->worldYCoord(m_pt1.y());
 						m_is_collecting_point = false;
 						m_widget->pointCollected(m_pt_x, m_pt_y);
+						m_widget->setCursor(Qt::ArrowCursor);
 				}
 			}
 		}
@@ -315,9 +316,6 @@ namespace matplot::backend {
 			double x = -(double)delta.x() / (double)m_widget->canvas()->width();
 			double y = (double)delta.y() / (double)m_widget->canvas()->height();
 			m_widget->canvas()->panWorldWindow(x, y);
-
-			// Set new axis
-			updateAxis();
 
 			// Store last point
 			m_pt0 = m_pt1;
@@ -353,9 +351,6 @@ namespace matplot::backend {
 		int w = m_widget->canvas()->width();
 		int h = m_widget->canvas()->height();
 		m_widget->canvas()->scaleWorldWindow(delta, (double)_event->position().x() / (double)w, 1.0 - (double)_event->position().y() / (double)h);
-
-		// Adjust axist
-		updateAxis();
 	}
 
 	void MatQt::updateAxis()
@@ -366,10 +361,32 @@ namespace matplot::backend {
 		double cright = m_widget->canvas()->worldRight();
 		double cbottom = m_widget->canvas()->worldBottom();
 		double ctop = m_widget->canvas()->worldTop();
-		double xmin = interp1(m_xmin, m_xmax, cleft);
-		double xmax = interp1(m_xmin, m_xmax, cright);
-		double ymin = interp1(m_ymin, m_ymax, cbottom);
-		double ymax = interp1(m_ymin, m_ymax, ctop);
+
+		double ymin;
+		double ymax;
+		if (m_y_reverse)
+		{
+			ymax = interp1(m_ymax, m_ymin, cbottom);
+			ymin = interp1(m_ymax, m_ymin, ctop);
+		}
+		else
+		{
+			ymin = interp1(m_ymin, m_ymax, cbottom);
+			ymax = interp1(m_ymin, m_ymax, ctop);
+		}
+
+		double xmin;
+		double xmax;
+		if (m_x_reverse)
+		{
+			xmax = interp1(m_xmax, m_xmin, cleft);
+			xmin = interp1(m_xmax, m_xmin, cright);
+		}
+		else
+		{
+			xmin = interp1(m_xmin, m_xmax, cleft);
+			xmax = interp1(m_xmin, m_xmax, cright);
+		}
 		
 		// Evaluate nice ticks
 		matplot::ticks_results results_x = matplot::calcticks(xmin, xmax, true, 0.02*(xmax-xmin));
@@ -377,21 +394,14 @@ namespace matplot::backend {
 
 		if (m_x_reverse)
 		{
-
 			for (double& x : results_x.ticks)
-				x = xmax - x;
-
-			std::reverse(results_x.ticks.begin(), results_x.ticks.end());
-			std::reverse(results_x.tickLabels.begin(), results_x.tickLabels.end());
+				x = xmin + xmax - x;
 		}
 
 		if (m_y_reverse)
 		{
 			for (double& y : results_y.ticks)
-				y = ymax - y;
-
-			std::reverse(results_y.ticks.begin(), results_y.ticks.end());
-			std::reverse(results_y.tickLabels.begin(), results_y.tickLabels.end());
+				y = ymin + ymax - y;
 		}
 
 		// Update axis

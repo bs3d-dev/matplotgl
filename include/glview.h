@@ -1,6 +1,7 @@
 #pragma once
 
-#include <QtOpenGL/QGLWidget>
+#include <QtOpenGLWidgets/QOpenGLWidget>
+#include <QOpenGLFunctions>
 
 namespace matplot
 {
@@ -11,7 +12,7 @@ namespace matplot
 }
 
 
-class GLView : public QGLWidget
+class GLView : public QOpenGLWidget, protected QOpenGLFunctions
 {
 
 	Q_OBJECT;
@@ -68,7 +69,6 @@ public slots:
 
 signals:
 	void currentWorldCoord(double x, double y);
-
 
 private:
 	// Canvas predefined slots

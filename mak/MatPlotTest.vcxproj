@@ -104,15 +104,17 @@
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'" Label="QtSettings" />
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <QtModules>core;opengl;gui;widgets</QtModules>
+    <QtModules>core;gui;widgets;openglwidgets</QtModules>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'" Label="QtSettings">
-    <QtModules>core;opengl;gui;widgets</QtModules>
+    <QtModules>core;gui;widgets;opengl;openglwidgets</QtModules>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <QtModules>core;opengl;gui;widgets</QtModules>
+    <QtModules>core;gui;widgets;openglwidgets</QtModules>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'" Label="QtSettings" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'" Label="QtSettings">
+    <QtModules>core;gui;widgets;opengl;openglwidgets</QtModules>
+  </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') OR !Exists('$(QtMsBuild)\Qt.props')">
     <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
   </Target>
@@ -334,7 +336,7 @@
     <ClInclude Include="..\include\colormap.h" />
     <ClInclude Include="..\include\legend_box.h" />
     <ClInclude Include="..\include\matqt.h" />
-    <ClInclude Include="..\include\matqt_widget.h" />
+    <QtMoc Include="..\include\matqt_widget.h" />
     <ClInclude Include="..\include\title_widget.h" />
     <ClInclude Include="..\include\util.h" />
   </ItemGroup>

@@ -6,7 +6,7 @@
 #include "..\include\glview.h"
 
 GLView::GLView(QWidget* parent)
-	: QGLWidget(parent)
+	: QOpenGLWidget(parent)
 	, m_is_rendering(false)
 	, m_has_plot(false)
 	, m_backend(nullptr)
@@ -25,6 +25,10 @@ GLView::~GLView()
 
 void GLView::initializeGL()
 {
+
+	// Initialize GL functions
+	initializeOpenGLFunctions();
+
 	// Set white as background color and clear window
 	glClearColor(1.0,1.0,1.0,1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -35,12 +39,24 @@ void GLView::initializeGL()
 
 void GLView::resizeGL(int _width, int _height)
 {
+
+	if (m_is_rendering)
+		return;
+
 	// Avoid division by zero
 	if (_width == 0) _width = 1;
 
 	// Store GL canvas sizes in object properties
 	m_width = _width;
 	m_height = _height;
+
+	// Setup world space window limits based on model bounding box
+	m_left = 0.0;
+	m_right = 1.0;
+	m_bottom = 0.0;
+	m_top = 1.0;
+
+	scaleWorldWindow(1.10);
 
 	// Setup the viewport to canvas dimensions
 	glViewport(0, 0, (GLint)m_width, (GLint)m_height);
@@ -95,6 +111,7 @@ void GLView::drawXAxis()
 	// Get world coordinates
 	ticks = interp1(m_left, m_right, ticks);
 
+	//this->makeCurrent();
 	// Draw ticks
 	glColor3f(0.0, 0.0, 0.0);
 	glLineWidth(1.0);
@@ -105,6 +122,7 @@ void GLView::drawXAxis()
 		glVertex2d(ticks[i], m_bottom + 0.015*(m_top - m_bottom));
 		glEnd();
 	}	
+	//this->doneCurrent();
 }
 
 void GLView::drawYAxis()
@@ -161,18 +179,22 @@ void GLView::scaleWorldWindow(double _scaleFac)
 	m_top = cy + sizey * 0.5 * _scaleFac;
 	/*** COMPLETE HERE - GLCANVAS: 03 ***/
 
+	//this->makeCurrent();
 	// Establish the clipping volume by setting up an
 	// orthographic projection
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
-
+	//this->doneCurrent();
 	//drawAttributes();
+
+	m_backend->updateAxis();
 	update();
 }
 
 void GLView::scaleWorldWindow(double _scaleFac, double _pcx, double _pcy)
 {
+	double vpr;          // viewport distortion ratio
 	double cx, cy;       // window center
 	double sizex, sizey; // window sizes
 
@@ -180,11 +202,17 @@ void GLView::scaleWorldWindow(double _scaleFac, double _pcx, double _pcy)
 	sizex = (m_right - m_left);
 	sizey = (m_top - m_bottom);
 
+	//Compute canvas viewport ratio.
+	vpr = (double)m_height / (double)m_width;
+
 	// Get current window center.
 	cx = m_left + sizex * _pcx;
 	cy = m_bottom + sizey * _pcy;
 
 	// Adjust window 
+	double wr = sizey / sizex;
+	if (wr < vpr) sizey = sizex * vpr;
+	else  sizex = sizey / vpr;
 	double szLeft = sizex * _pcx;
 	double szBottom = sizey * _pcy;
 	m_left = cx - szLeft * _scaleFac;
@@ -192,12 +220,15 @@ void GLView::scaleWorldWindow(double _scaleFac, double _pcx, double _pcy)
 	m_bottom = cy - szBottom * _scaleFac;
 	m_top = cy + (sizey - szBottom) * _scaleFac;
 
+	this->makeCurrent();
 	// Establish the clipping volume by setting up an
 	// orthographic projection
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
+	this->doneCurrent();
 
+	m_backend->updateAxis();
 	update();
 }
 
@@ -215,25 +246,39 @@ void GLView::panWorldWindow(double _panFacX, double _panFacY)
 
 	// Establish the clipping volume by setting up an
 	// orthographic projection
+	this->makeCurrent();
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
+	this->doneCurrent();
+
+	m_backend->updateAxis();
 
 	update();
 }
 
 void GLView::fitWorldToViewport()
 {
+
+	// Setup world space window limits based on model bounding box
 	m_left = 0.0;
 	m_right = 1.0;
 	m_bottom = 0.0;
 	m_top = 1.0;
 
+	scaleWorldWindow(1.10);
+
+	this->makeCurrent();
 	// Establish the clipping volume by setting up an
 	// orthographic projection
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
+
+	// Setup display in model coordinates
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	this->doneCurrent();
 
 	update();
 }
@@ -292,29 +337,37 @@ double GLView::worldYCoord(double _y_screen)
 
 void GLView::renderBegin()
 {
+	this->hide();
 	this->makeCurrent();
 	glNewList(m_plotId, GL_COMPILE);
+	this->doneCurrent();
 	m_is_rendering = true;
 	m_has_plot = false;
 }
 
 void GLView::renderEnd()
 {
+	this->makeCurrent();
 	glEndList();
+	this->doneCurrent();
 	m_is_rendering = false;
 	m_has_plot = true;
-	this->doneCurrent();
+	this->show();
 }
 
 void GLView::tempBegin()
 {
+	this->makeCurrent();
 	glNewList(m_tempId, GL_COMPILE);
+	this->doneCurrent();
 	m_is_rendering = true;
 }
 
 void GLView::tempEnd()
 {
+	this->makeCurrent();
 	glEndList();
+	this->doneCurrent();
 	m_is_rendering = false;
 }
 
@@ -349,6 +402,7 @@ void GLView::setYAxis(double _min, double _max, const std::vector<double>& _tick
 
 void GLView::drawPath(const std::vector<double>& x, const std::vector<double>& y, const std::array<float, 4>& color)
 {
+	this->makeCurrent();
 	// Set line color
 	glColor3d(color[1], color[2], color[3]);
 
@@ -360,11 +414,13 @@ void GLView::drawPath(const std::vector<double>& x, const std::vector<double>& y
 	for (int j = 0; j < x.size(); j++)
 		glVertex2d(x[j], y[j]);
 	glEnd();
+	this->doneCurrent();
 }
 
 void GLView::drawMarkers(const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z)
 {
 
+	this->makeCurrent();
 	// Set point size
 	glPointSize(5.0);
 
@@ -376,11 +432,13 @@ void GLView::drawMarkers(const std::vector<double>& x, const std::vector<double>
 	for (int n = 0; n < x.size(); n++)
 		glVertex2d(x[n], y[n]);
 	glEnd();
+	this->doneCurrent();
 }
 
 void GLView::drawTriangles(const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z)
 {
 
+	this->makeCurrent();
 	// Set color
 	glColor3d(1.0, 0.0, 0.0);
 
@@ -393,11 +451,13 @@ void GLView::drawTriangles(const std::vector<double>& x, const std::vector<doubl
 		glVertex2d(x[2], y[2]);
 		glEnd();
 	}
+	this->doneCurrent();
 
 }
 
 void GLView::drawPolygon(const std::vector<double>& x, const std::vector<double>& y, const std::vector<std::array<float, 4>>& color)
 {
+	this->makeCurrent();
 	glBegin(GL_POLYGON);
 	// Draw polygon
 	for (int j = 0; j < x.size(); j++)
@@ -406,10 +466,15 @@ void GLView::drawPolygon(const std::vector<double>& x, const std::vector<double>
 		glVertex2d(x[j], y[j]);
 	}
 	glEnd();
+	this->doneCurrent();
 }
 
 void GLView::drawPolygon(const std::vector<double>& x, const std::vector<double>& y, const std::array<float, 4>& color)
 {
+	this->makeCurrent();
+	if (x.size() < 3)
+		return;
+
 	glBegin(GL_POLYGON);
 	// Draw polygon
 	glColor3d(color[1], color[2], color[3]);
@@ -418,6 +483,7 @@ void GLView::drawPolygon(const std::vector<double>& x, const std::vector<double>
 		glVertex2d(x[j], y[j]);
 	}
 	glEnd();
+	this->doneCurrent();
 }
 
 void GLView::mouseDoubleClickEvent(QMouseEvent* _event)

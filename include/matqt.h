@@ -101,7 +101,7 @@ namespace matplot::backend {
 		void mouseMoveEvent(QMouseEvent* event);
 		void wheelEvent(class QWheelEvent* _event);
 
-	protected:
+	//protected:
 		void updateAxis();
 
 	private:

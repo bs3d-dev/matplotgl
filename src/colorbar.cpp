@@ -30,7 +30,6 @@ QSize Colorbar::sizeHint() const
 
 void Colorbar::setContourLevels(double contour_min, double contour_max, const std::vector<double>& contour_levels, const std::vector<std::string>& contour_labels, int _exp)
 {
-
 	m_cmin = contour_min;
 	m_cmax = contour_max;
 	m_levels = contour_levels;

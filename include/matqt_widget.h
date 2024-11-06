@@ -12,7 +12,7 @@ class MatQtWidget : public QWidget
 {
 
 
-	//Q_OBJECT;
+	Q_OBJECT;
 
 
 public:
@@ -32,6 +32,9 @@ public:
 	void reset();
 
 	GLView* canvas();
+
+public slots:
+	void openConfigurations();
 
 
 private:
