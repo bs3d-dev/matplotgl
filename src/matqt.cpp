@@ -18,6 +18,7 @@ namespace matplot::backend {
 		, m_y_reverse(false)
 		, m_mouseMoveTol(10)
 		, m_is_collecting_line(false)
+		, m_is_collecting_polyline(false)
 		, m_is_collecting_point(false)
 		, m_is_first_pt(false)
 	{
@@ -224,6 +225,7 @@ namespace matplot::backend {
 	{
 		m_is_collecting_point = true;		
 		m_is_collecting_line = false;
+		m_is_collecting_polyline = false;
 		m_widget->setCursor(Qt::CrossCursor);
 	}
 
@@ -232,7 +234,45 @@ namespace matplot::backend {
 		m_is_collecting_line = true;
 		m_is_first_pt = true;
 		m_is_collecting_point = false;
+		m_is_collecting_polyline = false;
 		m_widget->setCursor(Qt::CrossCursor);
+	}
+
+	void MatQt::begin_polyline_collection()
+	{
+		m_poly_x.clear();
+		m_poly_y.clear();
+		m_is_collecting_polyline = true;
+		m_is_first_pt = true;
+		m_is_collecting_line = false;
+		m_is_collecting_point = false;
+		m_widget->setCursor(Qt::CrossCursor);
+	}
+
+	void MatQt::end_polyline_collection()
+	{
+		m_widget->canvas()->tempBegin();
+		m_widget->canvas()->tempEnd();
+		m_widget->canvas()->update();
+		m_is_collecting_polyline = false;
+		m_is_first_pt = true;
+		m_widget->polylineCollected(m_poly_x, m_poly_y);
+	}
+
+	void MatQt::cancel_point_collection()
+	{
+		m_is_collecting_point = false;
+		m_widget->setCursor(Qt::ArrowCursor);
+	}
+
+	void MatQt::cancel_polyline_collection()
+	{
+		m_widget->canvas()->tempBegin();
+		m_widget->canvas()->tempEnd();
+		m_widget->canvas()->update();
+		m_is_collecting_polyline = false;
+		m_is_first_pt = true;
+		m_widget->setCursor(Qt::ArrowCursor);
 	}
 
 	void MatQt::mouseDoubleClickEvent(QMouseEvent* event)
@@ -259,7 +299,31 @@ namespace matplot::backend {
 		Qt::MouseButton mouseButton = event->button();
 		if (mouseButton == Qt::LeftButton)
 		{
-			if (m_is_collecting_line)
+			if (m_is_collecting_polyline)
+			{
+				// Only consider current point if left mouse point was used and
+				// if it is on the same location of button press point.
+				if ((abs(m_pt0.x() - m_pt1.x()) <= m_mouseMoveTol) &&
+					(abs(m_pt0.y() - m_pt1.y()) <= m_mouseMoveTol))
+				{
+					if (m_is_first_pt)
+					{
+						m_line_x0 = m_widget->canvas()->worldXCoord(m_pt1.x());
+						m_line_y0 = m_widget->canvas()->worldYCoord(m_pt1.y());
+						m_poly_x.push_back(m_line_x0);
+						m_poly_y.push_back(m_line_y0);
+						m_is_first_pt = false;
+					}						
+					else
+					{
+						m_line_x0 = m_widget->canvas()->worldXCoord(m_pt1.x());
+						m_line_y0 = m_widget->canvas()->worldYCoord(m_pt1.y());
+						m_poly_x.push_back(m_line_x0);
+						m_poly_y.push_back(m_line_y0);
+					}
+				}					
+			}		
+			else if (m_is_collecting_line)
 			{
 				// Only consider current point if left mouse point was used and
 				// if it is on the same location of button press point.
@@ -328,14 +392,18 @@ namespace matplot::backend {
 			if ((abs(m_pt0.x() - m_pt1.x()) > m_mouseMoveTol) ||
 				(abs(m_pt0.y() - m_pt1.y()) > m_mouseMoveTol))
 			{
-				if (m_is_collecting_line && !m_is_first_pt)
+				if (m_is_collecting_line || m_is_collecting_polyline && !m_is_first_pt)
 				{
 					// Convert current mouse position point to world coordinates
 					m_line_xtemp = m_widget->canvas()->worldXCoord(m_pt1.x());
 					m_line_ytemp = m_widget->canvas()->worldYCoord(m_pt1.y());
 					// Render temp line
 					m_widget->canvas()->tempBegin();
-					draw_path({ m_line_x0,m_line_xtemp }, { m_line_y0,m_line_ytemp }, { 0, 0, 0, 0 });
+					for (size_t i = 1; i < m_poly_x.size(); i++)
+					{
+						draw_path({ m_poly_x[i - 1],m_poly_x[i] }, { m_poly_y[i - 1],m_poly_y[i] }, { 0, 0, 0, 0 });
+					}
+					draw_path({ m_poly_x.back(),m_line_xtemp }, { m_poly_y.back(),m_line_ytemp }, { 0, 0, 0, 0 });
 					m_widget->canvas()->tempEnd();
 					m_widget->canvas()->update();
 				}

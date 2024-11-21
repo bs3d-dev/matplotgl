@@ -20,6 +20,8 @@
 
 class MatQtWidget;
 
+using dVec = std::vector<double>;
+
 namespace matplot::backend {
 	class MATPLOT_EXPORTS MatQt : public backend_interface {
 
@@ -93,6 +95,10 @@ namespace matplot::backend {
 
 		void begin_point_collection();
 		void begin_line_collection();
+		void begin_polyline_collection();
+		void end_polyline_collection();
+		void cancel_point_collection();
+		void cancel_polyline_collection();
 
 		// Mouse events slots
 		void mouseDoubleClickEvent(QMouseEvent* event);
@@ -120,6 +126,7 @@ namespace matplot::backend {
 		// Curve collection directions
 		bool m_is_collecting_point;
 		bool m_is_collecting_line;		
+		bool m_is_collecting_polyline;		
 		bool m_is_first_pt;		
 
 		// QPoint is a Qt class that defines a point in a plane
@@ -135,6 +142,8 @@ namespace matplot::backend {
 		double m_line_x1;
 		double m_line_y0;
 		double m_line_y1;
+		dVec m_poly_x;
+		dVec m_poly_y;
 		double m_line_xtemp;
 		double m_line_ytemp;
 	};

@@ -381,6 +381,26 @@ void GLView::beginLineCollection()
 	m_backend->begin_line_collection();
 }
 
+void GLView::beginPolylineCollection()
+{
+	m_backend->begin_polyline_collection();
+}
+
+void GLView::endPolylineCollection()
+{
+	m_backend->end_polyline_collection();
+}
+
+void GLView::cancelPointCollection()
+{
+	m_backend->cancel_point_collection();
+}
+
+void GLView::cancelPolylineCollection()
+{
+	m_backend->cancel_polyline_collection();
+}
+
 void GLView::setBackEnd(matplot::backend::MatQt* _backend)
 {
 	m_backend = _backend;

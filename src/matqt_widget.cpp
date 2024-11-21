@@ -82,6 +82,14 @@ void MatQtWidget::lineCollected(double x0, double y0, double x1, double y1)
 	}
 }
 
+void MatQtWidget::polylineCollected(std::vector<double> x, std::vector<double> y)
+{
+	for (auto observer : m_observers)
+	{
+		observer->polylineCollected(x,y);
+	}
+}
+
 void MatQtWidget::reset()
 {
 	ui.colorbar->hide();

@@ -28,6 +28,7 @@ public:
 	void setLegends(const std::vector<std::string>& labels, const std::vector<matplot::line_spec>& line_specs);
 	void pointCollected(double x, double y);
 	void lineCollected(double x0, double y0, double x1, double y1);
+	void polylineCollected(std::vector<double> x, std::vector<double> y);
 
 	void reset();
 
@@ -44,6 +45,7 @@ public:
 	class Observer
 	{
 	public:
+		virtual void polylineCollected(std::vector<double> x, std::vector<double> y) = 0;
 		virtual void lineCollected(double x0, double y0, double x1, double y1) = 0;
 		virtual void pointCollected(double x, double y) = 0;
 	};

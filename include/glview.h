@@ -47,6 +47,10 @@ public:
 
 	void beginWellCollection();
 	void beginLineCollection();
+	void beginPolylineCollection();
+	void endPolylineCollection();
+	void cancelPointCollection();
+	void cancelPolylineCollection();
 
 	void setBackEnd(matplot::backend::MatQt* _backend);
 
