@@ -252,7 +252,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../include;..\matplotplusplus\build\source\matplot;..\matplotplusplus\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../include;../libs/glm/include;..\matplotplusplus\build\source\matplot;..\matplotplusplus\source;%(AdditionalIncludeDirectories);$(ProjectDir);$(Qt_INCLUDEPATH_)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -292,7 +292,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>../include;..\matplotplusplus\build\source\matplot;..\matplotplusplus\source;%(AdditionalIncludeDirectories);$(ProjectDir);$(Qt_INCLUDEPATH_)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../include;../libs/glm/include;..\matplotplusplus\build\source\matplot;..\matplotplusplus\source;%(AdditionalIncludeDirectories);$(ProjectDir);$(Qt_INCLUDEPATH_)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -327,6 +327,7 @@
     <ClCompile Include="..\src\legend_box.cpp" />
     <ClCompile Include="..\src\matqt.cpp" />
     <ClCompile Include="..\src\matqt_widget.cpp" />
+    <ClCompile Include="..\src\shader.cpp" />
     <ClCompile Include="..\src\title_widget.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -337,6 +338,7 @@
     <ClInclude Include="..\include\legend_box.h" />
     <ClInclude Include="..\include\matqt.h" />
     <QtMoc Include="..\include\matqt_widget.h" />
+    <ClInclude Include="..\include\shader.h" />
     <ClInclude Include="..\include\title_widget.h" />
     <ClInclude Include="..\include\util.h" />
   </ItemGroup>

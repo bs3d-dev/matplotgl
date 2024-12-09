@@ -3,7 +3,12 @@
 #include "matqt.h"
 #include <array>
 #include "util.h"
-#include "..\include\glview.h"
+#include "shader.h"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 
 GLView::GLView(QWidget* parent)
 	: QOpenGLWidget(parent)
@@ -29,12 +34,40 @@ void GLView::initializeGL()
 	// Initialize GL functions
 	initializeOpenGLFunctions();
 
+	// Initialize shaders
+	m_shader = Shader::defaultColorShader();
+	m_aux_shader = Shader::defaultShader();
+
+	// Init buffers
+	glGenVertexArrays(1, &TVAO_main);
+	glGenBuffers(1, &TVBO_main);
+	glGenVertexArrays(1, &LVAO_main);
+	glGenBuffers(1, &LVBO_main);
+	glGenVertexArrays(1, &TVAO_temp);
+	glGenBuffers(1, &TVBO_temp);
+	glGenVertexArrays(1, &LVAO_temp);
+	glGenBuffers(1, &LVBO_temp);
+	glGenVertexArrays(1, &LVAO_border);
+	glGenBuffers(1, &LVBO_border);
+	glGenVertexArrays(1, &LVAO_xaxis);
+	glGenBuffers(1, &LVBO_xaxis);
+	glGenVertexArrays(1, &LVAO_yaxis);
+	glGenBuffers(1, &LVBO_yaxis);
+
+	// Initialize border
+	std::array<double,8> border = { -0.9999,-0.9999,
+																																	 1.0,-0.9999, 
+																																	 1.0, 1.0, 
+																																	-0.9999, 1.0 };
+	glBindVertexArray(LVAO_border);
+	glBindBuffer(GL_ARRAY_BUFFER, LVBO_border);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(double) * 8, &border[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 2 * sizeof(double), (void*)0);
+	glEnableVertexAttribArray(0);
+
 	// Set white as background color and clear window
 	glClearColor(1.0,1.0,1.0,1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
-
-	m_plotId = glGenLists(1);
-	m_tempId = glGenLists(1);
 }
 
 void GLView::resizeGL(int _width, int _height)
@@ -61,17 +94,11 @@ void GLView::resizeGL(int _width, int _height)
 	// Setup the viewport to canvas dimensions
 	glViewport(0, 0, (GLint)m_width, (GLint)m_height);
 
-	// Reset the coordinate system
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
 	// Establish the clipping volume by setting up an
 	// orthographic projection
-	glOrtho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
-
-	// Setup display in model coordinates
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	glm::mat4 trans = glm::ortho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
+	unsigned int transformLoc = glGetUniformLocation(m_shader->id(), "transform");
+	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 }
 
 void GLView::paintGL()
@@ -81,69 +108,110 @@ void GLView::paintGL()
 
 	//Clear the buffer with the current clear color
 	glClear(GL_COLOR_BUFFER_BIT);
-	// Draw model's data
-	glCallList(m_plotId);
-	// Draw model's data
-	glCallList(m_tempId);
 
-	// Draw border
-	glColor3f(0.0, 0.0, 0.0);
-	glLineWidth(1.5);
-	glBegin(GL_LINE_LOOP);
-	glVertex2f(m_left, m_top);
-	glVertex2f(m_left, m_bottom);
-	glVertex2f(m_right, m_bottom);
-	glVertex2f(m_right, m_top);
-	glEnd();
+	m_aux_shader->use();
+	glBindVertexArray(LVAO_border);
+	glDrawArrays(GL_LINE_LOOP, 0, 4);
+	glBindVertexArray(LVAO_xaxis);
+	glDrawArrays(GL_LINES, 0, m_x_ticks.size()*2);
+	glBindVertexArray(LVAO_yaxis);
+	glDrawArrays(GL_LINES, 0, m_y_ticks.size()*2);
 
-	drawXAxis();
-	drawYAxis();
+	m_shader->use();
+	// Draw main data
+	if (!tva_main.empty())
+	{
+		glBindVertexArray(TVAO_main);
+		glDrawArrays(GL_TRIANGLES, 0, tva_main.size() / 5);
+	}
+	if (!lva_main.empty())
+	{
+		glBindVertexArray(LVAO_main);
+		glDrawArrays(GL_LINES, 0, lva_main.size() / 5);
+	}
+
+	if (!tva_temp.empty())
+	{
+		glBindVertexArray(TVAO_temp);
+		glDrawArrays(GL_TRIANGLES, 0, tva_temp.size() / 5);
+	}
+	if (!lva_temp.empty())
+	{
+		glBindVertexArray(LVAO_temp);
+		glDrawArrays(GL_LINES, 0, lva_temp.size() / 5);
+	}
 
 }
 
 void GLView::drawXAxis()
 {
+
 	// Evaluate parametric values
-	std::vector<double> ticks(m_x_ticks.size());
+	std::vector<double> tick_vertexes;
 	for (int i = 0; i < m_x_ticks.size(); i++)
-		ticks[i] = (m_x_ticks[i] - m_x_min) / (m_x_max - m_x_min);
-
-	// Get world coordinates
-	ticks = interp1(m_left, m_right, ticks);
-
-	//this->makeCurrent();
-	// Draw ticks
-	glColor3f(0.0, 0.0, 0.0);
-	glLineWidth(1.0);
-	for (int i = 0; i < ticks.size(); i++)
 	{
-		glBegin(GL_LINE_STRIP);
-		glVertex2d(ticks[i], m_bottom);
-		glVertex2d(ticks[i], m_bottom + 0.015*(m_top - m_bottom));
-		glEnd();
-	}	
-	//this->doneCurrent();
+		double uc_tick = (2 * m_x_ticks[i] - (m_x_min + m_x_max)) / (m_x_max - m_x_min);
+		tick_vertexes.push_back(uc_tick);
+		tick_vertexes.push_back(-1.0);
+		tick_vertexes.push_back(uc_tick);
+		tick_vertexes.push_back(-1.0 + 0.015);
+	}
+
+	this->makeCurrent();
+	glBindVertexArray(LVAO_xaxis);
+	glBindBuffer(GL_ARRAY_BUFFER, LVBO_xaxis);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(double) * tick_vertexes.size(), &tick_vertexes[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 2 * sizeof(double), (void*)0);
+	glEnableVertexAttribArray(0);
+	this->doneCurrent();
 }
 
 void GLView::drawYAxis()
 {
+
 	// Evaluate parametric values
-	std::vector<double> ticks(m_y_ticks.size());
+	std::vector<double> tick_vertexes;
 	for (int i = 0; i < m_y_ticks.size(); i++)
-		ticks[i] = (m_y_ticks[i] - m_y_min) / (m_y_max - m_y_min);
-
-	// Get world coordinates
-	ticks = interp1(m_bottom, m_top, ticks);
-
-	// Draw ticks
-	glColor3f(0.0, 0.0, 0.0);
-	glLineWidth(1.0);
-	for (int i = 0; i < ticks.size(); i++)
 	{
-		glBegin(GL_LINE_STRIP);
-		glVertex2d(m_left, ticks[i]);
-		glVertex2d(m_left + 0.015*(m_right - m_left),ticks[i]);
-		glEnd();
+		double uc_tick = (2 * m_y_ticks[i] - (m_y_min + m_y_max)) / (m_y_max - m_y_min);
+		tick_vertexes.push_back(-1.0);
+		tick_vertexes.push_back(uc_tick);
+		tick_vertexes.push_back(-1.0 + 0.015);
+		tick_vertexes.push_back(uc_tick);
+	}
+
+	this->makeCurrent();
+	glBindVertexArray(LVAO_yaxis);
+	glBindBuffer(GL_ARRAY_BUFFER, LVBO_yaxis);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(double) * tick_vertexes.size(), &tick_vertexes[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 2 * sizeof(double), (void*)0);
+	glEnableVertexAttribArray(0);
+	this->doneCurrent();
+}
+
+std::vector<double>& GLView::currentLVA()
+{
+	switch (m_current_lst)
+	{
+	case MAIN:
+		return lva_main;
+	case TEMP:
+		return lva_temp;
+	default:
+		return lva_null;
+	}
+}
+
+std::vector<double>& GLView::currentTVA()
+{
+	switch (m_current_lst)
+	{
+	case MAIN:
+		return tva_main;
+	case TEMP:
+		return tva_temp;
+	default:
+		return tva_null;
 	}
 }
 
@@ -157,19 +225,14 @@ void GLView::scaleWorldWindow(double _scaleFac)
 	vpr = (double)m_height / (double)m_width;
 
 	// Set new window sizes based on scaling factor.
-	/*** COMPLETE HERE - GLCANVAS: 02 ***/
 	sizex = (m_right - m_left);
 	sizey = (m_top - m_bottom);
-	/*** COMPLETE HERE - GLCANVAS: 02 ***/
 
 	// Get current window center.
-	/*** COMPLETE HERE - GLCANVAS: 01 ***/
 	cx = m_left + sizex * 0.5;
 	cy = m_bottom + sizey * 0.5;
-	/*** COMPLETE HERE - GLCANVAS: 01 ***/
 
 	// Adjust window to keep the same aspect ratio of the viewport.
-	/*** COMPLETE HERE - GLCANVAS: 03 ***/
 	double wr = sizey / sizex;
 	if (wr < vpr) sizey = sizex * vpr;
 	else  sizex = sizey / vpr;
@@ -177,17 +240,16 @@ void GLView::scaleWorldWindow(double _scaleFac)
 	m_right = cx + sizex * 0.5 * _scaleFac;
 	m_bottom = cy - sizey * 0.5 * _scaleFac;
 	m_top = cy + sizey * 0.5 * _scaleFac;
-	/*** COMPLETE HERE - GLCANVAS: 03 ***/
 
-	//this->makeCurrent();
 	// Establish the clipping volume by setting up an
 	// orthographic projection
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
-	//this->doneCurrent();
-	//drawAttributes();
+	this->makeCurrent();
+	glm::mat4 trans = glm::ortho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
+	unsigned int transformLoc = glGetUniformLocation(m_shader->id(), "transform");
+	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+	this->doneCurrent();
 
+	// Update
 	m_backend->updateAxis();
 	update();
 }
@@ -220,12 +282,12 @@ void GLView::scaleWorldWindow(double _scaleFac, double _pcx, double _pcy)
 	m_bottom = cy - szBottom * _scaleFac;
 	m_top = cy + (sizey - szBottom) * _scaleFac;
 
-	this->makeCurrent();
 	// Establish the clipping volume by setting up an
 	// orthographic projection
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
+	this->makeCurrent();
+	glm::mat4 trans = glm::ortho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
+	unsigned int transformLoc = glGetUniformLocation(m_shader->id(), "transform");
+	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 	this->doneCurrent();
 
 	m_backend->updateAxis();
@@ -247,13 +309,13 @@ void GLView::panWorldWindow(double _panFacX, double _panFacY)
 	// Establish the clipping volume by setting up an
 	// orthographic projection
 	this->makeCurrent();
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
+	glm::mat4 trans = glm::ortho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
+	unsigned int transformLoc = glGetUniformLocation(m_shader->id(), "transform");
+	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 	this->doneCurrent();
 
+	// Update
 	m_backend->updateAxis();
-
 	update();
 }
 
@@ -266,20 +328,18 @@ void GLView::fitWorldToViewport()
 	m_bottom = 0.0;
 	m_top = 1.0;
 
+	// Scale to 1.10 times bounding box
 	scaleWorldWindow(1.10);
 
-	this->makeCurrent();
 	// Establish the clipping volume by setting up an
 	// orthographic projection
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
-
-	// Setup display in model coordinates
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	this->makeCurrent();
+	glm::mat4 trans = glm::ortho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
+	unsigned int transformLoc = glGetUniformLocation(m_shader->id(), "transform");
+	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 	this->doneCurrent();
 
+	// Update
 	update();
 }
 
@@ -338,37 +398,87 @@ double GLView::worldYCoord(double _y_screen)
 void GLView::renderBegin()
 {
 	this->hide();
-	this->makeCurrent();
-	glNewList(m_plotId, GL_COMPILE);
-	this->doneCurrent();
+	tva_main.clear();
+	lva_main.clear();
 	m_is_rendering = true;
 	m_has_plot = false;
+	m_current_lst = MAIN;
 }
 
 void GLView::renderEnd()
 {
 	this->makeCurrent();
-	glEndList();
-	this->doneCurrent();
 	m_is_rendering = false;
 	m_has_plot = true;
+
+	if (!tva_main.empty())
+	{
+		glBindVertexArray(TVAO_main);
+		glBindBuffer(GL_ARRAY_BUFFER, TVBO_main);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(double) * tva_main.size(), &tva_main[0], GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 5 * sizeof(double), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 5 * sizeof(double), (void*)(2 * sizeof(double)));
+		glEnableVertexAttribArray(1);
+	}
+
+	if (!lva_main.empty())
+	{
+		glBindVertexArray(LVAO_main);
+		glBindBuffer(GL_ARRAY_BUFFER, LVBO_main);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(double) * lva_main.size(), &lva_main[0], GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 5 * sizeof(double), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 5 * sizeof(double), (void*)(2 * sizeof(double)));
+		glEnableVertexAttribArray(1);
+	}
+	this->doneCurrent();
+
+	m_current_lst = NONE;
 	this->show();
 }
 
 void GLView::tempBegin()
 {
-	this->makeCurrent();
-	glNewList(m_tempId, GL_COMPILE);
-	this->doneCurrent();
+	tva_temp.clear();
+	lva_temp.clear();
 	m_is_rendering = true;
+	m_current_lst = TEMP;
 }
 
 void GLView::tempEnd()
 {
-	this->makeCurrent();
-	glEndList();
-	this->doneCurrent();
 	m_is_rendering = false;
+
+	this->makeCurrent();
+	if (!tva_temp.empty())
+	{
+		glBindVertexArray(TVAO_temp);
+		glBindBuffer(GL_ARRAY_BUFFER, TVBO_temp);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(double) * tva_temp.size(), &tva_temp[0], GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 5 * sizeof(double), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 5 * sizeof(double), (void*)(2 * sizeof(double)));
+		glEnableVertexAttribArray(1);
+	}
+
+	if (!lva_temp.empty())
+	{
+		glBindVertexArray(LVAO_temp);
+		glBindBuffer(GL_ARRAY_BUFFER, LVBO_temp);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(double) * lva_temp.size(), &lva_temp[0], GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 5 * sizeof(double), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 5 * sizeof(double), (void*)(2 * sizeof(double)));
+		glEnableVertexAttribArray(1);
+	}
+	this->doneCurrent();
+
+	m_current_lst = NONE;
 }
 
 void GLView::beginWellCollection()
@@ -411,6 +521,8 @@ void GLView::setXAxis(double _min, double _max, const std::vector<double>& _tick
 	m_x_min = _min;
 	m_x_max = _max;
 	m_x_ticks = _ticks;
+
+	drawXAxis();
 }
 
 void GLView::setYAxis(double _min, double _max, const std::vector<double>& _ticks)
@@ -418,92 +530,68 @@ void GLView::setYAxis(double _min, double _max, const std::vector<double>& _tick
 	m_y_min = _min;
 	m_y_max = _max;
 	m_y_ticks = _ticks;
+
+	drawYAxis();
 }
 
 void GLView::drawPath(const std::vector<double>& x, const std::vector<double>& y, const std::array<float, 4>& color)
 {
-	this->makeCurrent();
-	// Set line color
-	glColor3d(color[1], color[2], color[3]);
 
-	// Set line width
-	glLineWidth(1.0);
+	std::vector<double>& lva = currentLVA();
 
-	// Draw lines
-	glBegin(GL_LINE_STRIP);
-	for (int j = 0; j < x.size(); j++)
-		glVertex2d(x[j], y[j]);
-	glEnd();
-	this->doneCurrent();
+	// Store segments' vertexes
+	size_t npts = x.size();
+	for (size_t i = 1; i < npts; i++)
+	{
+		lva.push_back(x[i - 1]); lva.push_back(y[i - 1]); lva.push_back(color[1]);  lva.push_back(color[2]);  lva.push_back(color[3]);
+		lva.push_back(x[i]); lva.push_back(y[i]); lva.push_back(color[1]);  lva.push_back(color[2]);  lva.push_back(color[3]);
+	}
 }
 
 void GLView::drawMarkers(const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z)
 {
-
-	this->makeCurrent();
-	// Set point size
-	glPointSize(5.0);
-
-	// Set color
-	glColor3d(1.0, 0.0, 0.0);
-
- // Draw markers
-	glBegin(GL_POINTS);
-	for (int n = 0; n < x.size(); n++)
-		glVertex2d(x[n], y[n]);
-	glEnd();
-	this->doneCurrent();
 }
 
 void GLView::drawTriangles(const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z)
 {
-
-	this->makeCurrent();
-	// Set color
-	glColor3d(1.0, 0.0, 0.0);
-
-	// Draw triangles
-	for (int j = 0; j < x.size(); j++) 
-	{
-		glBegin(GL_TRIANGLES);
-		glVertex2d(x[0], y[0]);
-		glVertex2d(x[1], y[1]);
-		glVertex2d(x[2], y[2]);
-		glEnd();
-	}
-	this->doneCurrent();
-
 }
 
 void GLView::drawPolygon(const std::vector<double>& x, const std::vector<double>& y, const std::vector<std::array<float, 4>>& color)
 {
-	this->makeCurrent();
-	glBegin(GL_POLYGON);
-	// Draw polygon
-	for (int j = 0; j < x.size(); j++)
+
+	std::vector<double>& tva = currentTVA();
+
+	size_t nvtx = x.size();
+	size_t cvtx = 2;
+	while (cvtx < nvtx)
 	{
-		glColor3d(color[j][1], color[j][2], color[j][3]);
-		glVertex2d(x[j], y[j]);
+		tva.push_back(x[0]); tva.push_back(y[0]);
+		tva.push_back(color[0][1]); tva.push_back(color[0][2]); tva.push_back(color[0][3]);
+		tva.push_back(x[cvtx - 1]); tva.push_back(y[cvtx - 1]);
+		tva.push_back(color[cvtx - 1][1]); tva.push_back(color[cvtx - 1][2]); tva.push_back(color[cvtx - 1][3]);
+		tva.push_back(x[cvtx]); tva.push_back(y[cvtx]);
+		tva.push_back(color[cvtx][1]); tva.push_back(color[cvtx][2]); tva.push_back(color[cvtx][3]);
+		cvtx++;
 	}
-	glEnd();
-	this->doneCurrent();
 }
 
 void GLView::drawPolygon(const std::vector<double>& x, const std::vector<double>& y, const std::array<float, 4>& color)
 {
-	this->makeCurrent();
-	if (x.size() < 3)
-		return;
 
-	glBegin(GL_POLYGON);
-	// Draw polygon
-	glColor3d(color[1], color[2], color[3]);
-	for (int j = 0; j < x.size(); j++)
+	std::vector<double>& tva = currentTVA();
+
+	size_t nvtx = x.size();
+	size_t cvtx = 2;
+	while (cvtx < nvtx)
 	{
-		glVertex2d(x[j], y[j]);
+		tva.push_back(x[0]); tva.push_back(y[0]);
+		tva.push_back(color[1]); tva.push_back(color[2]); tva.push_back(color[3]);
+		tva.push_back(x[cvtx - 1]); tva.push_back(y[cvtx - 1]);
+		tva.push_back(color[1]); tva.push_back(color[2]); tva.push_back(color[3]);
+		tva.push_back(x[cvtx]); tva.push_back(y[cvtx]);
+		tva.push_back(color[1]); tva.push_back(color[2]); tva.push_back(color[3]);
+		cvtx++;
 	}
-	glEnd();
-	this->doneCurrent();
 }
 
 void GLView::mouseDoubleClickEvent(QMouseEvent* _event)

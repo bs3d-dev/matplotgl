@@ -21,6 +21,10 @@ namespace matplot::backend {
 		, m_is_collecting_polyline(false)
 		, m_is_collecting_point(false)
 		, m_is_first_pt(false)
+		, m_ymin(0.00)
+		, m_xmin(0.00)
+		, m_ymax(0.00)
+		, m_xmax(0.00)
 	{
 		m_widget->canvas()->setBackEnd(this);
 	}

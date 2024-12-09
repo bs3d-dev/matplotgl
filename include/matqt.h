@@ -71,8 +71,7 @@ namespace matplot::backend {
 		void draw_text(const std::vector<double>& x,
 			const std::vector<double>& y,
 			const std::vector<double>& z = {}) override;
-		void
-			draw_image(const std::vector<std::vector<double>>& x,
+		void draw_image(const std::vector<std::vector<double>>& x,
 				const std::vector<std::vector<double>>& y,
 				const std::vector<std::vector<double>>& z = {}) override;
 		void draw_triangle(const std::vector<double>& x,
