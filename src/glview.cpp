@@ -43,6 +43,8 @@ void GLView::initializeGL()
 	glGenBuffers(1, &TVBO_main);
 	glGenVertexArrays(1, &LVAO_main);
 	glGenBuffers(1, &LVBO_main);
+	glGenVertexArrays(1, &PVAO_main);
+	glGenBuffers(1, &PVBO_main);
 	glGenVertexArrays(1, &TVAO_temp);
 	glGenBuffers(1, &TVBO_temp);
 	glGenVertexArrays(1, &LVAO_temp);
@@ -68,6 +70,8 @@ void GLView::initializeGL()
 	// Set white as background color and clear window
 	glClearColor(1.0,1.0,1.0,1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	glPointSize(5.0f);
 }
 
 void GLView::resizeGL(int _width, int _height)
@@ -139,6 +143,11 @@ void GLView::paintGL()
 	{
 		glBindVertexArray(LVAO_temp);
 		glDrawArrays(GL_LINES, 0, lva_temp.size() / 5);
+	}
+	if (!pva_main.empty())
+	{
+		glBindVertexArray(PVAO_main);
+		glDrawArrays(GL_POINTS, 0, pva_main.size()/5);
 	}
 
 }
@@ -400,6 +409,7 @@ void GLView::renderBegin()
 	this->hide();
 	tva_main.clear();
 	lva_main.clear();
+	pva_main.clear();
 	m_is_rendering = true;
 	m_has_plot = false;
 	m_current_lst = MAIN;
@@ -434,6 +444,19 @@ void GLView::renderEnd()
 		glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 5 * sizeof(double), (void*)(2 * sizeof(double)));
 		glEnableVertexAttribArray(1);
 	}
+
+	if (!pva_main.empty())
+	{
+		glBindVertexArray(PVAO_main);
+		glBindBuffer(GL_ARRAY_BUFFER, PVBO_main);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(double) * pva_main.size(), &pva_main[0], GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 5 * sizeof(double), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 5 * sizeof(double), (void*)(2 * sizeof(double)));
+		glEnableVertexAttribArray(1);
+	}
+
 	this->doneCurrent();
 
 	m_current_lst = NONE;
@@ -550,6 +573,15 @@ void GLView::drawPath(const std::vector<double>& x, const std::vector<double>& y
 
 void GLView::drawMarkers(const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z)
 {
+
+	const std::array<float, 4> color = { 1.0f,0.0f,0.0f,0.0f };
+	size_t npts = x.size();
+	for (size_t i = 0; i < x.size(); i++)
+	{
+		pva_main.push_back(x[i]); pva_main.push_back(y[i]);
+		pva_main.push_back(color[1]);  pva_main.push_back(color[2]);  pva_main.push_back(color[3]);
+	}
+
 }
 
 void GLView::drawTriangles(const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z)

@@ -124,8 +124,10 @@ private:
 	Shader* m_aux_shader;
 	unsigned int TVAO_main;
 	unsigned int LVAO_main;
+	unsigned int PVAO_main;
 	unsigned int TVBO_main;
 	unsigned int LVBO_main;
+	unsigned int PVBO_main;
 	unsigned int TVAO_temp;
 	unsigned int LVAO_temp;
 	unsigned int TVBO_temp;
@@ -140,6 +142,7 @@ private:
 
 	std::vector<double> tva_main;
 	std::vector<double> lva_main;
+	std::vector<double> pva_main;
 	std::vector<double> tva_temp;
 	std::vector<double> lva_temp;
 	std::vector<double> tva_null;
