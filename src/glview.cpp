@@ -19,6 +19,7 @@ GLView::GLView(QWidget* parent)
 	, m_right(1)
 	, m_bottom(0)
 	, m_top(1)
+	, m_vpr_auto(true)
 {
 	// Set mouse tracking
 	setMouseTracking(true);
@@ -71,7 +72,14 @@ void GLView::initializeGL()
 	glClearColor(1.0,1.0,1.0,1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	// Set point size
 	glPointSize(5.0f);
+
+	// Establish the clipping volume by setting up an
+	// orthographic projection
+	glm::mat4 trans = glm::ortho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
+	unsigned int transformLoc = glGetUniformLocation(m_shader->id(), "transform");
+	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 }
 
 void GLView::resizeGL(int _width, int _height)
@@ -230,9 +238,6 @@ void GLView::scaleWorldWindow(double _scaleFac)
 	double cx, cy;       // window center
 	double sizex, sizey; // window sizes
 
-	//Compute canvas viewport ratio.
-	vpr = (double)m_height / (double)m_width;
-
 	// Set new window sizes based on scaling factor.
 	sizex = (m_right - m_left);
 	sizey = (m_top - m_bottom);
@@ -241,10 +246,15 @@ void GLView::scaleWorldWindow(double _scaleFac)
 	cx = m_left + sizex * 0.5;
 	cy = m_bottom + sizey * 0.5;
 
-	// Adjust window to keep the same aspect ratio of the viewport.
+	//Compute canvas viewport ratio.
+	if (m_vpr_auto)
+		vpr = (double)m_height / (double)m_width;
+	else
+		vpr = m_vpr;
+
 	double wr = sizey / sizex;
-	if (wr < vpr) sizey = sizex * vpr;
-	else  sizex = sizey / vpr;
+		if (wr < vpr) sizey = sizex * vpr;
+		else  sizex = sizey / vpr;
 	m_left = cx - sizex * 0.5 * _scaleFac;
 	m_right = cx + sizex * 0.5 * _scaleFac;
 	m_bottom = cy - sizey * 0.5 * _scaleFac;
@@ -274,7 +284,10 @@ void GLView::scaleWorldWindow(double _scaleFac, double _pcx, double _pcy)
 	sizey = (m_top - m_bottom);
 
 	//Compute canvas viewport ratio.
-	vpr = (double)m_height / (double)m_width;
+	if(m_vpr_auto)
+		vpr = (double)m_height / (double)m_width; 
+	else
+		vpr = m_vpr;
 
 	// Get current window center.
 	cx = m_left + sizex * _pcx;
@@ -350,6 +363,34 @@ void GLView::fitWorldToViewport()
 
 	// Update
 	update();
+}
+
+void GLView::setViewportRatioMode(VPRMode _mode)
+{
+	if (_mode == VPRMode::AUTO)
+	{
+		m_vpr_auto = true;
+		fitWorldToViewport();
+		return;
+	}
+
+	if (_mode == VPRMode::CUSTOM)
+	{
+		m_vpr_auto = false;
+		m_vpr = (double)m_height / (double)m_width;
+		return;
+	}
+
+}
+
+void GLView::setViewportRatio(double _vpr)
+{
+	if (m_vpr_auto)
+		return;
+
+	m_vpr_auto = false;
+	m_vpr = _vpr;
+ fitWorldToViewport();
 }
 
 double GLView::worldLeft() const

@@ -22,6 +22,7 @@ class GLView : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 
 public:
 	enum List { TEMP, MAIN, NONE };
+	enum VPRMode { AUTO, CUSTOM};
 
 public:
 	GLView(QWidget* parent = 0);
@@ -32,6 +33,8 @@ public:
 	void scaleWorldWindow(double _scaleFac, double _pcx, double _pcy);
 	void panWorldWindow(double _panFacX, double _panFacY);
 	void fitWorldToViewport();
+	void setViewportRatioMode(VPRMode _mode);
+	void setViewportRatio(double _vpr);
 
 	double worldLeft() const;
 	double worldRight() const;
@@ -111,6 +114,10 @@ private:
 	double m_x_max;
 	double m_y_min;
 	double m_y_max;
+
+	// Distortion ratio
+	bool m_vpr_auto;
+	double m_vpr;
 
 	std::vector<double> m_x_ticks;
 	std::vector<double> m_y_ticks;

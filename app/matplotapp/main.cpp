@@ -4,7 +4,8 @@
 #include <matplot/axes_objects/isocontour.h>
 #include <thread>
 
-#include "matqt_widget.h"
+//#include "matqt_widget.h"
+#include "main_window.h"
 #include "matqt.h"
 
 using namespace matplot;
@@ -13,16 +14,17 @@ int main(int argc, char** argv)
 {
 
  QApplication app(argc, argv);
- MatQtWidget window;
+ MainWindow window;
 
- //std::vector<double> x = linspace(0, 2 * pi);
- //std::vector<double> y = transform(x, [](auto x) { return sin(x); });
- //std::vector<double> y2 = transform(x, [](auto x) { return cos(x); });
+ std::vector<double> x = linspace(0, 2 * pi);
+ std::vector<double> y = transform(x, [](auto x) { return sin(x); });
+ std::vector<double> y2 = transform(x, [](auto x) { return cos(x); });
 
 
- auto b = create_backend<matplot::backend::MatQt>(&window);
+ auto b = create_backend<matplot::backend::MatQt>(window.matQt());
  auto f = figure_no_backend(true); f->backend(b);
  auto ax = f->current_axes();
+ window.show();
 
  //auto [X, Y, Z] = peaks();
 
@@ -46,9 +48,7 @@ int main(int argc, char** argv)
  //}
 
  //ax->hold(on);
- std::vector<double> x = { 1.0 };
- std::vector<double> y = { 1.0 };
- ax->plot(x, y, "*");
+ ax->plot(x, y, "-");
  //ax->plot(x, y2, "-");
 
  //ax->legend({ "Sin","Cos" });
@@ -60,11 +60,10 @@ int main(int argc, char** argv)
  //xlabel(ax, "X");
  //ylabel(ax, "Y");
  //ax->cblim({ -6,6 });
-
-
- window.show();
+ // 
   //Start rendering
  f->draw();
+
 
  return app.exec();
 }
