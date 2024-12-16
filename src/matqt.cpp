@@ -25,6 +25,10 @@ namespace matplot::backend {
 		, m_xmin(0.00)
 		, m_ymax(0.00)
 		, m_xmax(0.00)
+		, m_x_tick_auto(false)
+		, m_y_tick_auto(false)
+		, m_x_spacing(false)
+		, m_y_spacing(false)
 	{
 		m_widget->canvas()->setBackEnd(this);
 	}
@@ -172,19 +176,45 @@ namespace matplot::backend {
 		m_widget->canvas()->drawPolygon(x, y, color);
 	}
 
-	void MatQt::draw_axis(double x_min, double x_max, double y_min, double y_max, bool x_reverse, bool y_reverse)
+	void MatQt::draw_x_axis(double x_min, double x_max, bool x_reverse, double x_spacing)
 	{
 		// Store limits
 		m_xmin = x_min;
 		m_xmax = x_max;
+
+		// Store reverse mode
+		m_x_reverse = x_reverse;
+
+		if (x_spacing > 0.00)
+		{
+			m_x_tick_auto = false;
+			m_x_spacing = x_spacing;
+		}
+		else
+			m_x_tick_auto = true;
+
+
+		updateXAxis();
+	}
+
+	void MatQt::draw_y_axis(double y_min, double y_max, bool y_reverse, double y_spacing)
+	{
+		// Store limits
 		m_ymin = y_min;
 		m_ymax = y_max;
 
 		// Store directions
-		m_x_reverse = x_reverse;
 		m_y_reverse = y_reverse;
 
-		updateAxis();
+		if (y_spacing > 0.00)
+		{
+			m_y_tick_auto = false;
+			m_y_spacing = y_spacing;
+		}
+		else
+			m_y_tick_auto = true;
+
+		updateYAxis();
 	}
 
 	void MatQt::draw_colorbar(double contour_min, double contour_max)
@@ -425,12 +455,80 @@ namespace matplot::backend {
 		m_widget->canvas()->scaleWorldWindow(delta, (double)_event->position().x() / (double)w, 1.0 - (double)_event->position().y() / (double)h);
 	}
 
-	void MatQt::updateAxis()
+	void MatQt::updateXAxis()
 	{
 
 		// Adjust axis
 		double cleft = m_widget->canvas()->worldLeft();
 		double cright = m_widget->canvas()->worldRight();
+
+		double xmin;
+		double xmax;
+		if (m_x_reverse)
+		{
+			xmax = interp1(m_xmax, m_xmin, cleft);
+			xmin = interp1(m_xmax, m_xmin, cright);
+		}
+		else
+		{
+			xmin = interp1(m_xmin, m_xmax, cleft);
+			xmax = interp1(m_xmin, m_xmax, cright);
+		}
+
+		matplot::ticks_results results_x;
+		if (m_x_tick_auto)
+		{
+			// Evaluate nice ticks
+			results_x = matplot::calcticks(xmin, xmax, true, 0.02 * (xmax - xmin));
+		}
+		else
+		{
+			// Evaluate manual spacing ticks
+			double min_fac = xmin / m_x_spacing;
+			double max_fac = xmax / m_x_spacing;
+
+			int n_min = xmin < 0 ? ceil(min_fac) : floor(min_fac);
+			int n_max = xmax < 0 ? floor(max_fac) : ceil(max_fac);
+
+			for (int i = n_min; i < n_max; i++)
+			{
+				double x = i * m_x_spacing;
+				results_x.ticks.push_back(x);
+				std::stringstream ss;
+				ss << std::fixed << std::setprecision(2) << x;
+				results_x.tickLabels.push_back(ss.str());
+			}
+				
+
+			//for (double x : results_x.ticks)
+			//{
+			//	auto info = scientific_notation(x);
+			//	if (info.exp > 5)
+			//	{
+			//		std::stringstream ss;
+			//		ss << std::fixed << std::setprecision(4) << info.dec;
+			//		results_x.tickLabels.push_back(ss.str());
+			//		results_x.expDec = 
+			//	}
+			//}
+
+		}
+		
+
+		if (m_x_reverse)
+		{
+			for (double& x : results_x.ticks)
+				x = xmin + xmax - x;
+		}
+
+		// Update axis
+		m_widget->setXAxis(xmin, xmax, results_x.ticks, results_x.tickLabels, results_x.expDec);
+
+	}
+
+	void MatQt::updateYAxis()
+	{
+		// Adjust axis
 		double cbottom = m_widget->canvas()->worldBottom();
 		double ctop = m_widget->canvas()->worldTop();
 
@@ -447,27 +545,29 @@ namespace matplot::backend {
 			ymax = interp1(m_ymin, m_ymax, ctop);
 		}
 
-		double xmin;
-		double xmax;
-		if (m_x_reverse)
+		// Evaluate nice ticks
+		matplot::ticks_results results_y;
+		if (m_y_tick_auto)
 		{
-			xmax = interp1(m_xmax, m_xmin, cleft);
-			xmin = interp1(m_xmax, m_xmin, cright);
+			results_y = matplot::calcticks(ymin, ymax);
 		}
 		else
 		{
-			xmin = interp1(m_xmin, m_xmax, cleft);
-			xmax = interp1(m_xmin, m_xmax, cright);
-		}
-		
-		// Evaluate nice ticks
-		matplot::ticks_results results_x = matplot::calcticks(xmin, xmax, true, 0.02*(xmax-xmin));
-		matplot::ticks_results results_y = matplot::calcticks(ymin, ymax);
+			// Evaluate manual spacing ticks
+			double min_fac = ymin / m_y_spacing;
+			double max_fac = ymax / m_y_spacing;
 
-		if (m_x_reverse)
-		{
-			for (double& x : results_x.ticks)
-				x = xmin + xmax - x;
+			int n_min = ymin < 0 ? ceil(min_fac) : floor(min_fac);
+			int n_max = ymax < 0 ? floor(max_fac) : ceil(max_fac);
+
+			for (int i = n_min; i < n_max; i++)
+			{
+				double y = i * m_y_spacing;
+				results_y.ticks.push_back(y);
+				std::stringstream ss;
+				ss << std::fixed << std::setprecision(4) << y;
+				results_y.tickLabels.push_back(ss.str());
+			}
 		}
 
 		if (m_y_reverse)
@@ -477,8 +577,14 @@ namespace matplot::backend {
 		}
 
 		// Update axis
-		m_widget->setXAxis(xmin, xmax, results_x.ticks, results_x.tickLabels, results_x.expDec);
 		m_widget->setYAxis(ymin, ymax, results_y.ticks, results_y.tickLabels, results_y.expDec);
+
+	}
+
+	void MatQt::updateAxis()
+	{
+		updateXAxis();
+		updateYAxis();
 	}
 
 } // namespace matplot::backend

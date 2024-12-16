@@ -51,6 +51,7 @@ int main(int argc, char** argv)
  ax->plot(x, y, "-");
  window.matQt()->canvas()->setGridXEnabled(true);
  window.matQt()->canvas()->setGridYEnabled(true);
+
  //ax->plot(x, y2, "-");
 
  //ax->legend({ "Sin","Cos" });
@@ -66,6 +67,8 @@ int main(int argc, char** argv)
   //Start rendering
  f->draw();
 
+ ax->x_axis().tick_spacing(0.5);
+ ax->y_axis().tick_spacing(0.25);
 
  return app.exec();
 }

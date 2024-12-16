@@ -85,7 +85,8 @@ namespace matplot::backend {
 			const std::vector<double>& y,
 			const std::array<float, 4>& color) override;
 
-		void draw_axis(double x_min, double x_max, double y_min, double y_max, bool x_reverse, bool y_reverse) override;
+		void draw_x_axis(double x_min, double x_max, bool x_reverse, double x_spacing) override;
+		void draw_y_axis(double y_min, double y_max, bool y_reverse, double y_spacing) override;
 
 		void draw_colorbar(double contour_min, double contour_max) override;
 		void draw_labels(const std::string& x_label, const std::string& y_label) override;
@@ -107,6 +108,8 @@ namespace matplot::backend {
 		void wheelEvent(class QWheelEvent* _event);
 
 	//protected:
+		void updateXAxis();
+		void updateYAxis();
 		void updateAxis();
 
 	private:
@@ -117,6 +120,14 @@ namespace matplot::backend {
 		double m_xmax;
 		double m_ymin;
 		double m_ymax;
+
+		// Axes spacing
+		double m_x_spacing;
+		double m_y_spacing;
+
+		// Axes mode
+		bool m_x_tick_auto;
+		bool m_y_tick_auto;
 
 		// Axes directions
 		bool m_x_reverse;

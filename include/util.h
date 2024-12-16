@@ -4,6 +4,13 @@
 #include <fstream>
 namespace fs = std::filesystem;
 
+struct NumInfo
+{
+	int n_digits;
+	double dec;
+	int exp;
+};
+
 struct Param2Px
 {
 
@@ -38,6 +45,40 @@ static std::vector<T> interp1(const T& a, const T& b, const std::vector<T>& t)
 		r[i] = interp1(a, b, t[i]);
 	}
 	return r;
+}
+
+static NumInfo scientific_notation(double num)
+{
+
+	NumInfo info;
+	if (num == 0) {
+		info.dec = 0;
+		info.n_digits = 1;
+		info.exp = 0;
+		return info;
+	}
+
+	bool is_negative = num < 0;
+	num = abs(num);
+
+	int n_digits = 1;
+	int exponent = 0;
+	while (num >= 10) {
+		num /= 10;
+		n_digits++;
+		exponent++;
+	}
+	while (num < 1) {
+		num *= 10;
+		n_digits++;
+		exponent--;
+	}
+	
+	info.dec = num;
+	info.dec = num;
+	info.exp = exponent;
+
+	return info;
 }
 
 static int number_of_lines(const fs::path& file)

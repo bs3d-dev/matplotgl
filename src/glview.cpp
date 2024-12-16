@@ -182,6 +182,9 @@ void GLView::paintGL()
 void GLView::drawXAxis()
 {
 
+	if (m_x_ticks.empty())
+		return;
+
 	// Evaluate parametric values
 	std::vector<double> tick_vertexes;
 	for (int i = 0; i < m_x_ticks.size(); i++)
@@ -204,6 +207,9 @@ void GLView::drawXAxis()
 
 void GLView::drawYAxis()
 {
+
+	if (m_y_ticks.empty())
+		return;
 
 	// Evaluate parametric values
 	std::vector<double> tick_vertexes;
@@ -232,6 +238,9 @@ void GLView::drawXGrid()
 	if (!m_grid.x_enabled)
 		return;
 
+	if (m_x_ticks.empty())
+		return;
+
 	// Evaluate parametric values
 	std::vector<double> tick_vertexes;
 	for (int i = 0; i < m_x_ticks.size(); i++)
@@ -255,6 +264,9 @@ void GLView::drawYGrid()
 
 	// Check enabled
 	if (!m_grid.y_enabled)
+		return;
+
+	if (m_y_ticks.empty())
 		return;
 
 	// Evaluate parametric values
@@ -465,13 +477,15 @@ void GLView::setViewportRatio(double _vpr)
 void GLView::setGridXEnabled(bool _is_enabled)
 {
 	m_grid.x_enabled = _is_enabled;
-	drawXGrid();
+	if(m_grid.x_enabled)
+		drawXGrid();	
 }
 
 void GLView::setGridYEnabled(bool _is_enabled)
 {
 	m_grid.y_enabled = _is_enabled;
-	drawYGrid();
+	if (m_grid.y_enabled)
+		drawYGrid();
 }
 
 double GLView::worldLeft() const
