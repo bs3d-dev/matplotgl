@@ -17,12 +17,18 @@ class Shader;
 class GLView : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 {
 
-	Q_OBJECT;
+	struct Grid
+	{
+		bool x_enabled{ false };
+		bool y_enabled{ false };
+		int n_pts;
+	};
 
+	Q_OBJECT;
 
 public:
 	enum List { TEMP, MAIN, NONE };
-	enum VPRMode { AUTO, CUSTOM};
+	enum VPRMode { AUTO, CUSTOM };
 
 public:
 	GLView(QWidget* parent = 0);
@@ -35,6 +41,8 @@ public:
 	void fitWorldToViewport();
 	void setViewportRatioMode(VPRMode _mode);
 	void setViewportRatio(double _vpr);
+	void setGridXEnabled(bool _is_enabled);
+	void setGridYEnabled(bool _is_enabled);
 
 	double worldLeft() const;
 	double worldRight() const;
@@ -91,6 +99,8 @@ private:
 
 	void drawXAxis();
 	void drawYAxis();
+	void drawXGrid();
+	void drawYGrid();
 
 	std::vector<double>& currentLVA();
 	std::vector<double>& currentTVA();
@@ -129,6 +139,7 @@ private:
 
 	Shader* m_shader;
 	Shader* m_aux_shader;
+	Shader* m_grid_shader;
 	unsigned int TVAO_main;
 	unsigned int LVAO_main;
 	unsigned int PVAO_main;
@@ -142,6 +153,10 @@ private:
 
 	unsigned int LVAO_border;
 	unsigned int LVBO_border;
+	unsigned int LVAO_xgrid;
+	unsigned int LVBO_xgrid;
+	unsigned int LVAO_ygrid;
+	unsigned int LVBO_ygrid;
 	unsigned int LVAO_xaxis;
 	unsigned int LVBO_xaxis;
 	unsigned int LVAO_yaxis;
@@ -156,7 +171,5 @@ private:
 	std::vector<double> lva_null;
 
 	List m_current_lst;
-
-
-
+	Grid m_grid;
 };

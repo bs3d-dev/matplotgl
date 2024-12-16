@@ -49,6 +49,8 @@ int main(int argc, char** argv)
 
  //ax->hold(on);
  ax->plot(x, y, "-");
+ window.matQt()->canvas()->setGridXEnabled(true);
+ window.matQt()->canvas()->setGridYEnabled(true);
  //ax->plot(x, y2, "-");
 
  //ax->legend({ "Sin","Cos" });

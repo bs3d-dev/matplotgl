@@ -28,6 +28,7 @@ public:
 
  static Shader* defaultColorShader();
  static Shader* defaultShader();
+ static Shader* gridShader();
 
 private:
  void initialize(const char* vertexCode, const char* fragmentCode);

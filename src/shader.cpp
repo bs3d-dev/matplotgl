@@ -109,6 +109,25 @@ Shader* Shader::defaultShader()
  return new Shader(vShaderSource, fShaderSource);
 }
 
+Shader* Shader::gridShader()
+{
+ const char* vShaderSource = "#version 330 core\n"
+  "layout (location = 0) in vec2 aPos;\n"
+  "void main()\n"
+  "{\n"
+  "   gl_Position = vec4(aPos,0.00f, 1.0f);\n"
+  "}\0";
+
+ const char* fShaderSource = "#version 330 core\n"
+  "out vec4 FragColor;\n"
+  "void main()\n"
+  "{\n"
+  "   FragColor = vec4(0.827f,0.827f,0.827f,0.50f);\n"
+  "}\0";
+
+ return new Shader(vShaderSource, fShaderSource);
+}
+
 void Shader::initialize(const char* vShaderCode, const char* fShaderCode)
 {
  initializeOpenGLFunctions();

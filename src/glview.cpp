@@ -38,6 +38,7 @@ void GLView::initializeGL()
 	// Initialize shaders
 	m_shader = Shader::defaultColorShader();
 	m_aux_shader = Shader::defaultShader();
+	m_grid_shader = Shader::gridShader();
 
 	// Init buffers
 	glGenVertexArrays(1, &TVAO_main);
@@ -52,6 +53,10 @@ void GLView::initializeGL()
 	glGenBuffers(1, &LVBO_temp);
 	glGenVertexArrays(1, &LVAO_border);
 	glGenBuffers(1, &LVBO_border);
+	glGenVertexArrays(1, &LVAO_xgrid);
+	glGenBuffers(1, &LVBO_xgrid);
+	glGenVertexArrays(1, &LVAO_ygrid);
+	glGenBuffers(1, &LVBO_ygrid);
 	glGenVertexArrays(1, &LVAO_xaxis);
 	glGenBuffers(1, &LVBO_xaxis);
 	glGenVertexArrays(1, &LVAO_yaxis);
@@ -120,6 +125,20 @@ void GLView::paintGL()
 
 	//Clear the buffer with the current clear color
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	if (m_grid.x_enabled)
+	{
+		m_grid_shader->use();
+		glBindVertexArray(LVAO_xgrid);
+		glDrawArrays(GL_LINES, 0, m_x_ticks.size() * 2);
+	}
+
+	if (m_grid.y_enabled)
+	{
+		m_grid_shader->use();
+		glBindVertexArray(LVAO_ygrid);
+		glDrawArrays(GL_LINES, 0, m_y_ticks.size() * 2);
+	}
 
 	m_aux_shader->use();
 	glBindVertexArray(LVAO_border);
@@ -200,6 +219,56 @@ void GLView::drawYAxis()
 	this->makeCurrent();
 	glBindVertexArray(LVAO_yaxis);
 	glBindBuffer(GL_ARRAY_BUFFER, LVBO_yaxis);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(double) * tick_vertexes.size(), &tick_vertexes[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 2 * sizeof(double), (void*)0);
+	glEnableVertexAttribArray(0);
+	this->doneCurrent();
+}
+
+void GLView::drawXGrid()
+{
+
+	// Check enabled
+	if (!m_grid.x_enabled)
+		return;
+
+	// Evaluate parametric values
+	std::vector<double> tick_vertexes;
+	for (int i = 0; i < m_x_ticks.size(); i++)
+	{
+		double uc_tick = (2 * m_x_ticks[i] - (m_x_min + m_x_max)) / (m_x_max - m_x_min);
+		tick_vertexes.push_back(uc_tick); tick_vertexes.push_back(-1.0);
+		tick_vertexes.push_back(uc_tick); tick_vertexes.push_back(+1.0);
+	}
+
+	this->makeCurrent();
+	glBindVertexArray(LVAO_xgrid);
+	glBindBuffer(GL_ARRAY_BUFFER, LVBO_xgrid);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(double) * tick_vertexes.size(), &tick_vertexes[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 2 * sizeof(double), (void*)0);
+	glEnableVertexAttribArray(0);
+	this->doneCurrent();
+}
+
+void GLView::drawYGrid()
+{
+
+	// Check enabled
+	if (!m_grid.y_enabled)
+		return;
+
+	// Evaluate parametric values
+	std::vector<double> tick_vertexes;
+	for (int i = 0; i < m_y_ticks.size(); i++)
+	{
+		double uc_tick = (2 * m_y_ticks[i] - (m_y_min + m_y_max)) / (m_y_max - m_y_min);
+		tick_vertexes.push_back(-1.0); tick_vertexes.push_back(uc_tick);
+		tick_vertexes.push_back(+1.0); tick_vertexes.push_back(uc_tick);
+	}
+
+	this->makeCurrent();
+	glBindVertexArray(LVAO_ygrid);
+	glBindBuffer(GL_ARRAY_BUFFER, LVBO_ygrid);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(double) * tick_vertexes.size(), &tick_vertexes[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 2 * sizeof(double), (void*)0);
 	glEnableVertexAttribArray(0);
@@ -391,6 +460,18 @@ void GLView::setViewportRatio(double _vpr)
 	m_vpr_auto = false;
 	m_vpr = _vpr;
  fitWorldToViewport();
+}
+
+void GLView::setGridXEnabled(bool _is_enabled)
+{
+	m_grid.x_enabled = _is_enabled;
+	drawXGrid();
+}
+
+void GLView::setGridYEnabled(bool _is_enabled)
+{
+	m_grid.y_enabled = _is_enabled;
+	drawYGrid();
 }
 
 double GLView::worldLeft() const
@@ -587,6 +668,7 @@ void GLView::setXAxis(double _min, double _max, const std::vector<double>& _tick
 	m_x_ticks = _ticks;
 
 	drawXAxis();
+	drawXGrid();
 }
 
 void GLView::setYAxis(double _min, double _max, const std::vector<double>& _ticks)
@@ -596,6 +678,7 @@ void GLView::setYAxis(double _min, double _max, const std::vector<double>& _tick
 	m_y_ticks = _ticks;
 
 	drawYAxis();
+	drawYGrid();
 }
 
 void GLView::drawPath(const std::vector<double>& x, const std::vector<double>& y, const std::array<float, 4>& color)

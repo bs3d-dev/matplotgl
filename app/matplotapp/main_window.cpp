@@ -37,7 +37,6 @@ void MainWindow::setXRatio(int _value)
 
 void MainWindow::setYRatio(int _value)
 {
-
 	m_mqt_widget->canvas()->setViewportRatioMode(GLView::VPRMode::CUSTOM);
 
 	double x_ratio = (double)ui.xSlider->value() / (double)ui.xSlider->maximum() * 10;
