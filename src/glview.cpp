@@ -79,12 +79,8 @@ void GLView::initializeGL()
 
 	// Set point size
 	glPointSize(5.0f);
-
-	// Establish the clipping volume by setting up an
-	// orthographic projection
-	glm::mat4 trans = glm::ortho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
-	unsigned int transformLoc = glGetUniformLocation(m_shader->id(), "transform");
-	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+	
+	updateOrthoProjection();
 }
 
 void GLView::resizeGL(int _width, int _height)
@@ -110,12 +106,6 @@ void GLView::resizeGL(int _width, int _height)
 
 	// Setup the viewport to canvas dimensions
 	glViewport(0, 0, (GLint)m_width, (GLint)m_height);
-
-	// Establish the clipping volume by setting up an
-	// orthographic projection
-	glm::mat4 trans = glm::ortho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
-	unsigned int transformLoc = glGetUniformLocation(m_shader->id(), "transform");
-	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 }
 
 void GLView::paintGL()
@@ -176,7 +166,6 @@ void GLView::paintGL()
 		glBindVertexArray(PVAO_main);
 		glDrawArrays(GL_POINTS, 0, pva_main.size()/5);
 	}
-
 }
 
 void GLView::drawXAxis()
@@ -344,9 +333,7 @@ void GLView::scaleWorldWindow(double _scaleFac)
 	// Establish the clipping volume by setting up an
 	// orthographic projection
 	this->makeCurrent();
-	glm::mat4 trans = glm::ortho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
-	unsigned int transformLoc = glGetUniformLocation(m_shader->id(), "transform");
-	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+	updateOrthoProjection();
 	this->doneCurrent();
 
 	// Update
@@ -388,9 +375,7 @@ void GLView::scaleWorldWindow(double _scaleFac, double _pcx, double _pcy)
 	// Establish the clipping volume by setting up an
 	// orthographic projection
 	this->makeCurrent();
-	glm::mat4 trans = glm::ortho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
-	unsigned int transformLoc = glGetUniformLocation(m_shader->id(), "transform");
-	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+	updateOrthoProjection();
 	this->doneCurrent();
 
 	m_backend->updateAxis();
@@ -412,9 +397,7 @@ void GLView::panWorldWindow(double _panFacX, double _panFacY)
 	// Establish the clipping volume by setting up an
 	// orthographic projection
 	this->makeCurrent();
-	glm::mat4 trans = glm::ortho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
-	unsigned int transformLoc = glGetUniformLocation(m_shader->id(), "transform");
-	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+		updateOrthoProjection();
 	this->doneCurrent();
 
 	// Update
@@ -437,9 +420,7 @@ void GLView::fitWorldToViewport()
 	// Establish the clipping volume by setting up an
 	// orthographic projection
 	this->makeCurrent();
-	glm::mat4 trans = glm::ortho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
-	unsigned int transformLoc = glGetUniformLocation(m_shader->id(), "transform");
-	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+	updateOrthoProjection();
 	this->doneCurrent();
 
 	// Update
@@ -486,6 +467,15 @@ void GLView::setGridYEnabled(bool _is_enabled)
 	m_grid.y_enabled = _is_enabled;
 	if (m_grid.y_enabled)
 		drawYGrid();
+}
+
+void GLView::updateOrthoProjection()
+{
+	// Establish the clipping volume by setting up an
+	// orthographic projection
+	glm::mat4 trans = glm::ortho(m_left, m_right, m_bottom, m_top, -1.0, 1.0);
+	unsigned int transformLoc = glGetUniformLocation(m_shader->id(), "transform");
+	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 }
 
 double GLView::worldLeft() const
@@ -593,6 +583,7 @@ void GLView::renderEnd()
 		glEnableVertexAttribArray(1);
 	}
 
+	updateOrthoProjection();
 	this->doneCurrent();
 
 	m_current_lst = NONE;

@@ -19,6 +19,7 @@ int main(int argc, char** argv)
  std::vector<double> x = linspace(0, 2 * pi);
  std::vector<double> y = transform(x, [](auto x) { return sin(x); });
  std::vector<double> y2 = transform(x, [](auto x) { return cos(x); });
+ std::vector<double> err(y.size(), 0.1);
 
 
  auto b = create_backend<matplot::backend::MatQt>(window.matQt());
@@ -48,7 +49,8 @@ int main(int argc, char** argv)
  //}
 
  //ax->hold(on);
- ax->plot(x, y, "-");
+ ax->errorbar(x, y, err, err, err, err);
+ //ax->errorbar(x, y, err, error_bar::type::horizontal);
  window.matQt()->canvas()->setGridXEnabled(true);
  window.matQt()->canvas()->setGridYEnabled(true);
 

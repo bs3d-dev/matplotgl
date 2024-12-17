@@ -43,6 +43,7 @@ public:
 	void setViewportRatio(double _vpr);
 	void setGridXEnabled(bool _is_enabled);
 	void setGridYEnabled(bool _is_enabled);
+	void updateOrthoProjection();
 
 	double worldLeft() const;
 	double worldRight() const;
