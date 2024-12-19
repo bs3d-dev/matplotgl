@@ -132,7 +132,7 @@ void YAxisWidget::paintEvent(QPaintEvent* event)
 	int font_max_width = font_metrics.horizontalAdvance("0.000000");
 	int font_max_height = font_metrics.height();
 
-	QRectF ticks_rect = rect() - QMargins(0.00, 30.00, 0.00, 10.00); /*ticks_rect.setWidth(font_max_width);*/
+	QRectF ticks_rect = rect() - QMargins(0.00, 10.00, 0.00, 10.00); /*ticks_rect.setWidth(font_max_width);*/
 
 	// Draw ticks
 
@@ -168,7 +168,7 @@ void YAxisWidget::paintEvent(QPaintEvent* event)
 		QRectF dec_rect = font_metrics.boundingRect("x 10");
 		QRectF exp_rect = exp_metrics.boundingRect(QString::number(m_exp));
 
-		dec_exp_rect.setLeft(dec_exp_rect.right() - dec_rect.width() - exp_rect.width() * 2);
+		dec_exp_rect.setLeft(dec_exp_rect.right() - dec_rect.width() - exp_rect.width() * 2 - font_max_width);
 		dec_exp_rect.setHeight(dec_rect.height() + exp_rect.height());
 
 		painter.drawText(dec_exp_rect, Qt::AlignBottom | Qt::AlignLeft, QString("x 10"));
@@ -183,10 +183,12 @@ void YAxisWidget::paintEvent(QPaintEvent* event)
 	}
 
 	// Draw label
+	QString label_text = QString::fromLatin1(m_label.c_str());
 	QRectF label_rect(ticks_rect.topLeft(), QPointF(text_rect.left(), ticks_rect.bottom()));
 	painter.translate(label_rect.center());
 	painter.rotate(-90);
-	painter.drawText(0, 0, QString::fromLatin1(m_label.c_str()));
+	int text_width = font_metrics.horizontalAdvance(label_text);
+	painter.drawText(-text_width/2, 0, label_text);
 	painter.rotate(90);
 
 }
