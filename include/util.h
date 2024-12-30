@@ -74,8 +74,7 @@ static NumInfo scientific_notation(double num)
 		exponent--;
 	}
 	
-	info.dec = num;
-	info.dec = num;
+	info.dec = is_negative ? -num : num;
 	info.exp = exponent;
 
 	return info;

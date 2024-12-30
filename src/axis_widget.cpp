@@ -207,10 +207,10 @@ QSize XAxisWidget::sizeHint() const
 
 QSize YAxisWidget::minimumSizeHint() const
 {
-	return QSize(75, 500);
+	return QSize(200, 500);
 }
 
 QSize YAxisWidget::sizeHint() const
 {
-	return  QSize(75, 500);
+	return  QSize(200, 500);
 }

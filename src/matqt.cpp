@@ -494,23 +494,12 @@ namespace matplot::backend {
 			{
 				double x = i * m_x_spacing;
 				results_x.ticks.push_back(x);
+				auto info = scientific_notation(x);
 				std::stringstream ss;
-				ss << std::fixed << std::setprecision(2) << x;
+				ss << std::fixed << std::setprecision(2) << info.dec;
 				results_x.tickLabels.push_back(ss.str());
+				results_x.expDec = info.exp;
 			}
-				
-
-			//for (double x : results_x.ticks)
-			//{
-			//	auto info = scientific_notation(x);
-			//	if (info.exp > 5)
-			//	{
-			//		std::stringstream ss;
-			//		ss << std::fixed << std::setprecision(4) << info.dec;
-			//		results_x.tickLabels.push_back(ss.str());
-			//		results_x.expDec = 
-			//	}
-			//}
 
 		}
 		
@@ -564,9 +553,11 @@ namespace matplot::backend {
 			{
 				double y = i * m_y_spacing;
 				results_y.ticks.push_back(y);
+				auto info = scientific_notation(y);
 				std::stringstream ss;
-				ss << std::fixed << std::setprecision(4) << y;
+				ss << std::fixed << std::setprecision(2) << info.dec;
 				results_y.tickLabels.push_back(ss.str());
+				results_y.expDec = info.exp;
 			}
 		}
 
