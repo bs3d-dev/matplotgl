@@ -19,7 +19,7 @@ GLView::GLView(QWidget* parent)
 	, m_right(1)
 	, m_bottom(0)
 	, m_top(1)
-	, m_vpr_auto(true)
+	, m_vpr_mode(VPRMode::AUTO)
 {
 	// Set mouse tracking
 	setMouseTracking(true);
@@ -317,14 +317,18 @@ void GLView::scaleWorldWindow(double _scaleFac)
 	cy = m_bottom + sizey * 0.5;
 
 	//Compute canvas viewport ratio.
-	if (m_vpr_auto)
-		vpr = (double)m_height / (double)m_width;
-	else
-		vpr = m_vpr;
+	if (m_vpr_mode != VPRMode::OFF)
+	{
+		if (m_vpr_mode == VPRMode::AUTO)
+			vpr = (double)m_height / (double)m_width;
+		else if (m_vpr_mode == VPRMode::CUSTOM)
+			vpr = m_vpr;
 
-	double wr = sizey / sizex;
+		double wr = sizey / sizex;
 		if (wr < vpr) sizey = sizex * vpr;
 		else  sizex = sizey / vpr;
+	}
+
 	m_left = cx - sizex * 0.5 * _scaleFac;
 	m_right = cx + sizex * 0.5 * _scaleFac;
 	m_bottom = cy - sizey * 0.5 * _scaleFac;
@@ -351,20 +355,23 @@ void GLView::scaleWorldWindow(double _scaleFac, double _pcx, double _pcy)
 	sizex = (m_right - m_left);
 	sizey = (m_top - m_bottom);
 
-	//Compute canvas viewport ratio.
-	if(m_vpr_auto)
-		vpr = (double)m_height / (double)m_width; 
-	else
-		vpr = m_vpr;
-
 	// Get current window center.
 	cx = m_left + sizex * _pcx;
 	cy = m_bottom + sizey * _pcy;
 
-	// Adjust window 
-	double wr = sizey / sizex;
-	if (wr < vpr) sizey = sizex * vpr;
-	else  sizex = sizey / vpr;
+	//Compute canvas viewport ratio.
+	if (m_vpr_mode != VPRMode::OFF)
+	{
+		if (m_vpr_mode == VPRMode::AUTO)
+			vpr = (double)m_height / (double)m_width;
+		else if (m_vpr_mode == VPRMode::CUSTOM)
+			vpr = m_vpr;
+
+		double wr = sizey / sizex;
+		if (wr < vpr) sizey = sizex * vpr;
+		else  sizex = sizey / vpr;
+	}
+
 	double szLeft = sizex * _pcx;
 	double szBottom = sizey * _pcy;
 	m_left = cx - szLeft * _scaleFac;
@@ -429,16 +436,23 @@ void GLView::fitWorldToViewport()
 
 void GLView::setViewportRatioMode(VPRMode _mode)
 {
-	if (_mode == VPRMode::AUTO)
+
+	m_vpr_mode = _mode;
+
+	if (m_vpr_mode == VPRMode::AUTO)
 	{
-		m_vpr_auto = true;
 		fitWorldToViewport();
 		return;
 	}
 
-	if (_mode == VPRMode::CUSTOM)
+	if (m_vpr_mode == VPRMode::OFF)
 	{
-		m_vpr_auto = false;
+		fitWorldToViewport();
+		return;
+	}
+
+	if (m_vpr_mode == VPRMode::CUSTOM)
+	{
 		m_vpr = (double)m_height / (double)m_width;
 		return;
 	}
@@ -447,10 +461,9 @@ void GLView::setViewportRatioMode(VPRMode _mode)
 
 void GLView::setViewportRatio(double _vpr)
 {
-	if (m_vpr_auto)
+	if (m_vpr_mode != VPRMode::CUSTOM)
 		return;
 
-	m_vpr_auto = false;
 	m_vpr = _vpr;
  fitWorldToViewport();
 }

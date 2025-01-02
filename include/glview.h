@@ -28,7 +28,7 @@ class GLView : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 
 public:
 	enum List { TEMP, MAIN, NONE };
-	enum VPRMode { AUTO, CUSTOM };
+	enum VPRMode { AUTO, CUSTOM, OFF };
 
 public:
 	GLView(QWidget* parent = 0);
@@ -127,7 +127,7 @@ private:
 	double m_y_max;
 
 	// Distortion ratio
-	bool m_vpr_auto;
+	VPRMode m_vpr_mode;
 	double m_vpr;
 
 	std::vector<double> m_x_ticks;

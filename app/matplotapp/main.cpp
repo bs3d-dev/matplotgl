@@ -26,6 +26,7 @@ int main(int argc, char** argv)
  auto f = figure_no_backend(true); f->backend(b);
  auto ax = f->current_axes();
  window.show();
+ window.matQt()->canvas()->setViewportRatioMode(GLView::VPRMode::OFF);
 
  //auto [X, Y, Z] = peaks();
 
@@ -48,13 +49,14 @@ int main(int argc, char** argv)
  // }
  //}
 
- //ax->hold(on);
- ax->errorbar(x, y, err, err, err, err);
+ ax->hold(on);
+ //ax->errorbar(x, y, err, err, err, err);
  //ax->errorbar(x, y, err, error_bar::type::horizontal);
- window.matQt()->canvas()->setGridXEnabled(true);
- window.matQt()->canvas()->setGridYEnabled(true);
+ //window.matQt()->canvas()->setGridXEnabled(true);
+ //window.matQt()->canvas()->setGridYEnabled(true);
 
- //ax->plot(x, y2, "-");
+ ax->plot(x, y, "-");
+ ax->plot(x, y2, "-");
 
  //ax->legend({ "Sin","Cos" });
 	//auto ich = ax->isocontour(X, Y, Z);
