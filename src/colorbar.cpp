@@ -20,12 +20,12 @@ Colorbar::~Colorbar()
 
 QSize Colorbar::minimumSizeHint() const
 {
-	return QSize(50,500);
+	return QSize(200,500);
 }
 
 QSize Colorbar::sizeHint() const
 {
-	return QSize(50,500);
+	return QSize(200,500);
 }
 
 void Colorbar::setContourLevels(double contour_min, double contour_max, const std::vector<double>& contour_levels, const std::vector<std::string>& contour_labels, int _exp)
@@ -65,7 +65,7 @@ void Colorbar::paintEvent(QPaintEvent* event)
 	painter.setBrush(brush);
 
 	QFontMetrics font_metrics = painter.fontMetrics();
-	int font_max_width = font_metrics.maxWidth();
+	int font_max_width = font_metrics.horizontalAdvance("0.000000");
 	int font_max_height = font_metrics.height();
 
 	// Draw colorbar
