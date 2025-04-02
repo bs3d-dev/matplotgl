@@ -52,6 +52,11 @@ void MatQtWidget::setYLabel(const std::string& _y_label)
 	ui.yAxisWidget->setLabel(_y_label);
 }
 
+void MatQtWidget::setCBLabel(const std::string& _cb_label)
+{
+	ui.colorbar->setLabel(_cb_label);
+}
+
 void MatQtWidget::setTitle(const std::string& _title)
 {
 	ui.titleWidget->setTitle(_title);

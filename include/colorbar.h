@@ -14,6 +14,7 @@ public:
 	QSize sizeHint() const override;
 
 	void setContourLevels(double contour_min, double contour_max, const std::vector<double>& contour_levels, const std::vector<std::string>& contour_labels, int _exp);
+	void setLabel(const std::string& _label);
 	void isEnabled(bool _check);
 
 protected:
@@ -30,6 +31,7 @@ private:
 
 	QPen pen;
 	QBrush brush;
+	std::string m_label;
 	int m_top_margin;
 	int m_bottom_margin;
 	int m_left_margin;

@@ -38,6 +38,11 @@ void Colorbar::setContourLevels(double contour_min, double contour_max, const st
 	m_enabled = true;
 }
 
+void Colorbar::setLabel(const std::string& _label)
+{
+	m_label = _label;
+}
+
 void Colorbar::isEnabled(bool _check)
 {
 	m_enabled = _check;
@@ -129,4 +134,9 @@ void Colorbar::paintEvent(QPaintEvent* event)
 		painter.restore();
 	}
 
+	// Draw label
+	QRectF label_rect = font_metrics.boundingRect(QString::fromStdString(m_label));
+	label_rect.moveLeft(text_rect.right() + 5.0);
+	label_rect.moveTop((rect().top() + rect().bottom()) / 2.0);
+	painter.drawText(label_rect, Qt::AlignCenter, QString::fromLatin1(m_label.c_str()));
 }

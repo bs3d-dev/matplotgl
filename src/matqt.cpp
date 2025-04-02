@@ -239,10 +239,11 @@ namespace matplot::backend {
 		m_widget->setColorbar(contour_min, contour_max,cticks_results.ticks,cticks_results.tickLabels,cticks_results.expDec);
 	}
 
-	void MatQt::draw_labels(const std::string& x_label, const std::string& y_label)
+	void MatQt::draw_labels(const std::string& x_label, const std::string& y_label, const std::string& cb_label)
 	{
 		m_widget->setXLabel(x_label);
 		m_widget->setYLabel(y_label);
+		m_widget->setCBLabel(cb_label);
 	}
 
 	void MatQt::draw_title(const std::string& _title)

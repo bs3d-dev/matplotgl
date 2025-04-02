@@ -24,6 +24,7 @@ public:
 	void setColorbar(double contour_min, double contour_max, const std::vector<double>& contour_levels, const std::vector<std::string>& contour_labels, int _exp);
 	void setXLabel(const std::string& _x_label);
 	void setYLabel(const std::string& _y_label);
+	void setCBLabel(const std::string& _cb_label);
 	void setTitle(const std::string& _title);
 	void setLegends(const std::vector<std::string>& labels, const std::vector<matplot::line_spec>& line_specs);
 	void pointCollected(double x, double y);
