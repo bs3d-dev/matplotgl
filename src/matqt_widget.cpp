@@ -39,7 +39,6 @@ void MatQtWidget::setColorbar(double contour_min, double contour_max, const std:
 {
 	ui.colorbar->setContourLevels(contour_min, contour_max, contour_levels, contour_labels, _exp);
 	ui.colorbar->update();
-	ui.colorbar->setVisible(true);
 }
 
 void MatQtWidget::setXLabel(const std::string& _x_label)
@@ -95,6 +94,31 @@ void MatQtWidget::polylineCollected(std::vector<double> x, std::vector<double> y
 	}
 }
 
+void MatQtWidget::setXAxisVisible(bool _switch)
+{
+	ui.xAxisWidget->setVisible(_switch);
+}
+
+void MatQtWidget::setYAxisVisible(bool _switch)
+{
+	ui.yAxisWidget->setVisible(_switch);
+}
+
+void MatQtWidget::setTitleVisible(bool _switch)
+{
+	ui.titleWidget->setVisible(_switch);
+}
+
+void MatQtWidget::setColorbarVisible(bool _switch)
+{
+	ui.colorbar->setVisible(_switch);
+}
+
+void MatQtWidget::setLegendsVisible(bool _switch)
+{
+	ui.legendBoxWidget->setVisible(_switch);
+}
+
 void MatQtWidget::reset()
 {
 	ui.colorbar->hide();
@@ -104,9 +128,4 @@ void MatQtWidget::reset()
 GLView* MatQtWidget::canvas()
 {
 	return ui.canvas;
-}
-
-void MatQtWidget::openConfigurations()
-{
-
 }

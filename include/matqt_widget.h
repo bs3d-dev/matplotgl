@@ -31,13 +31,15 @@ public:
 	void lineCollected(double x0, double y0, double x1, double y1);
 	void polylineCollected(std::vector<double> x, std::vector<double> y);
 
+	void setXAxisVisible(bool _switch);
+	void setYAxisVisible(bool _switch);
+	void setTitleVisible(bool _switch);
+	void setColorbarVisible(bool _switch);
+	void setLegendsVisible(bool _switch);
+
 	void reset();
 
 	GLView* canvas();
-
-public slots:
-	void openConfigurations();
-
 
 private:
 	Ui::MatQtWidget ui;
