@@ -8,6 +8,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <cmath>
+
+#define PI 3.141592653589793
 
 
 GLView::GLView(QWidget* parent)
@@ -51,6 +54,8 @@ void GLView::initializeGL()
 	glGenBuffers(1, &TVBO_temp);
 	glGenVertexArrays(1, &LVAO_temp);
 	glGenBuffers(1, &LVBO_temp);
+	glGenVertexArrays(1, &PVAO_temp);
+	glGenBuffers(1, &PVBO_temp);
 	glGenVertexArrays(1, &LVAO_border);
 	glGenBuffers(1, &LVBO_border);
 	glGenVertexArrays(1, &LVAO_xgrid);
@@ -150,6 +155,11 @@ void GLView::paintGL()
 		glBindVertexArray(LVAO_main);
 		glDrawArrays(GL_LINES, 0, lva_main.size() / 5);
 	}
+	if (!pva_main.empty())
+	{
+		glBindVertexArray(PVAO_main);
+		glDrawArrays(GL_POINTS, 0, pva_main.size() / 5);
+	}
 
 	if (!tva_temp.empty())
 	{
@@ -161,10 +171,10 @@ void GLView::paintGL()
 		glBindVertexArray(LVAO_temp);
 		glDrawArrays(GL_LINES, 0, lva_temp.size() / 5);
 	}
-	if (!pva_main.empty())
+	if (!pva_temp.empty())
 	{
-		glBindVertexArray(PVAO_main);
-		glDrawArrays(GL_POINTS, 0, pva_main.size()/5);
+		glBindVertexArray(PVAO_temp);
+		glDrawArrays(GL_POINTS, 0, pva_temp.size()/5);
 	}
 }
 
@@ -299,6 +309,19 @@ std::vector<double>& GLView::currentTVA()
 		return tva_temp;
 	default:
 		return tva_null;
+	}
+}
+
+std::vector<double>& GLView::currentPVA()
+{
+	switch (m_current_lst)
+	{
+	case MAIN:
+		return pva_main;
+	case TEMP:
+		return pva_temp;
+	default:
+		return pva_null;
 	}
 }
 
@@ -607,6 +630,7 @@ void GLView::tempBegin()
 {
 	tva_temp.clear();
 	lva_temp.clear();
+	pva_temp.clear();
 	m_is_rendering = true;
 	m_current_lst = TEMP;
 }
@@ -639,12 +663,23 @@ void GLView::tempEnd()
 		glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 5 * sizeof(double), (void*)(2 * sizeof(double)));
 		glEnableVertexAttribArray(1);
 	}
+	if (!pva_temp.empty())
+	{
+		glBindVertexArray(PVAO_temp);
+		glBindBuffer(GL_ARRAY_BUFFER, PVBO_temp);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(double) * pva_temp.size(), &pva_temp[0], GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 5 * sizeof(double), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 5 * sizeof(double), (void*)(2 * sizeof(double)));
+		glEnableVertexAttribArray(1);
+	}
 	this->doneCurrent();
 
 	m_current_lst = NONE;
 }
 
-void GLView::beginWellCollection()
+void GLView::beginPointCollection()
 {
 	m_backend->begin_point_collection();
 }
@@ -667,6 +702,11 @@ void GLView::endPolylineCollection()
 void GLView::cancelPointCollection()
 {
 	m_backend->cancel_point_collection();
+}
+
+void GLView::cancelLineCollection()
+{
+	//m_backend->ca();
 }
 
 void GLView::cancelPolylineCollection()
@@ -711,17 +751,19 @@ void GLView::drawPath(const std::vector<double>& x, const std::vector<double>& y
 		lva.push_back(x[i - 1]); lva.push_back(y[i - 1]); lva.push_back(color[1]);  lva.push_back(color[2]);  lva.push_back(color[3]);
 		lva.push_back(x[i]); lva.push_back(y[i]); lva.push_back(color[1]);  lva.push_back(color[2]);  lva.push_back(color[3]);
 	}
+
 }
 
 void GLView::drawMarkers(const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z)
 {
+	std::vector<double>& pva = currentPVA();
 
 	const std::array<float, 4> color = { 1.0f,0.0f,0.0f,0.0f };
 	size_t npts = x.size();
 	for (size_t i = 0; i < x.size(); i++)
 	{
-		pva_main.push_back(x[i]); pva_main.push_back(y[i]);
-		pva_main.push_back(color[1]);  pva_main.push_back(color[2]);  pva_main.push_back(color[3]);
+		pva.push_back(x[i]); pva.push_back(y[i]);
+		pva.push_back(color[1]);  pva.push_back(color[2]);  pva.push_back(color[3]);
 	}
 
 }
@@ -766,6 +808,37 @@ void GLView::drawPolygon(const std::vector<double>& x, const std::vector<double>
 		tva.push_back(color[1]); tva.push_back(color[2]); tva.push_back(color[3]);
 		cvtx++;
 	}
+}
+
+void GLView::drawCircles(const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& r, const std::array<float, 4>& color)
+{
+
+	std::vector<double>& lva = currentLVA();
+
+	for (size_t j = 0; j < x.size(); j++)
+	{
+		// Construct circle
+		int num_seg = 100;
+		int npts = num_seg + 1;
+		std::vector<double> cx(npts), cy(npts);
+		for (int i = 0; i < num_seg; i++)
+		{
+			double t = 2 * PI * i / num_seg;
+			cx[i] = x[j] + r[j] * std::cos(t);
+			cy[i] = y[j] + r[j] * std::sin(t);
+		}
+		cx[num_seg] = cx[0];
+		cy[num_seg] = cy[0];
+
+		// Store segments' vertexes
+		for (size_t i = 1; i < npts; i++)
+		{
+			lva.push_back(cx[i - 1]); lva.push_back(cy[i - 1]); lva.push_back(color[1]);  lva.push_back(color[2]);  lva.push_back(color[3]);
+			lva.push_back(cx[i]); lva.push_back(cy[i]); lva.push_back(color[1]);  lva.push_back(color[2]);  lva.push_back(color[3]);
+		}
+
+	}
+
 }
 
 void GLView::mouseDoubleClickEvent(QMouseEvent* _event)

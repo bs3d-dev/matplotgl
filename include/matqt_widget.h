@@ -27,9 +27,9 @@ public:
 	void setCBLabel(const std::string& _cb_label);
 	void setTitle(const std::string& _title);
 	void setLegends(const std::vector<std::string>& labels, const std::vector<matplot::line_spec>& line_specs);
-	void pointCollected(double x, double y);
-	void lineCollected(double x0, double y0, double x1, double y1);
-	void polylineCollected(std::vector<double> x, std::vector<double> y);
+	void collectPoint(double x, double y);
+	void collectLine(double x0, double y0, double x1, double y1);
+	void collectPolyline(std::vector<double> x, std::vector<double> y);
 
 	void setXAxisVisible(bool _switch);
 	void setYAxisVisible(bool _switch);
@@ -41,24 +41,13 @@ public:
 
 	GLView* canvas();
 
+	signals:
+		void pointCollected(double x, double y);
+		void lineCollected(double x0, double y0, double x1, double y1);
+		void polylineCollected(std::vector<double> x, std::vector<double> y);
+
 private:
 	Ui::MatQtWidget ui;
-
-public:
-	class Observer
-	{
-	public:
-		virtual void polylineCollected(std::vector<double> x, std::vector<double> y) = 0;
-		virtual void lineCollected(double x0, double y0, double x1, double y1) = 0;
-		virtual void pointCollected(double x, double y) = 0;
-	};
-
-public:
-	void attachObserver(Observer* _entry) { m_observers.push_back(_entry); };
-	void clearObservers() { m_observers.clear(); };
-
-private:
-	std::list<Observer*> m_observers;
 
 };
 

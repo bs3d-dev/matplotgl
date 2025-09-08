@@ -89,7 +89,7 @@ namespace matplot::backend {
 	}
 
 	bool MatQt::new_frame() {
-		m_widget->reset();
+		//m_widget->reset();
 		m_widget->canvas()->renderBegin();
 		return true;
 	}
@@ -291,7 +291,7 @@ namespace matplot::backend {
 		m_widget->canvas()->update();
 		m_is_collecting_polyline = false;
 		m_is_first_pt = true;
-		m_widget->polylineCollected(m_poly_x, m_poly_y);
+		m_widget->collectPolyline(m_poly_x, m_poly_y);
 	}
 
 	void MatQt::cancel_point_collection()
@@ -380,7 +380,7 @@ namespace matplot::backend {
 						m_widget->canvas()->update();
 						m_is_collecting_line = false;
 						m_is_first_pt = true;
-						m_widget->lineCollected(m_line_x0, m_line_y0, m_line_x1, m_line_y1);
+						m_widget->collectLine(m_line_x0, m_line_y0, m_line_x1, m_line_y1);
 						m_widget->setCursor(Qt::ArrowCursor);
 					}
 				}					
@@ -395,7 +395,7 @@ namespace matplot::backend {
 						m_pt_x = m_widget->canvas()->worldXCoord(m_pt1.x());
 						m_pt_y = m_widget->canvas()->worldYCoord(m_pt1.y());
 						m_is_collecting_point = false;
-						m_widget->pointCollected(m_pt_x, m_pt_y);
+						m_widget->collectPoint(m_pt_x, m_pt_y);
 						m_widget->setCursor(Qt::ArrowCursor);
 				}
 			}

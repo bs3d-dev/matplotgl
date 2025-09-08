@@ -70,28 +70,19 @@ void MatQtWidget::setLegends(const std::vector<std::string>& labels, const std::
 	ui.legendBoxWidget->setVisible(true);
 }
 
-void MatQtWidget::pointCollected(double x, double y)
+void MatQtWidget::collectPoint(double x, double y)
 {
-	for (auto observer : m_observers )
-	{
-		observer->pointCollected(x, y);
-	}
+	emit pointCollected(x, y);
 }
 
-void MatQtWidget::lineCollected(double x0, double y0, double x1, double y1)
+void MatQtWidget::collectLine(double x0, double y0, double x1, double y1)
 {
-	for (auto observer : m_observers )
-	{
-		observer->lineCollected(x0, y0, x1, y1);
-	}
+	emit lineCollected(x0, y0, x1, y1);
 }
 
-void MatQtWidget::polylineCollected(std::vector<double> x, std::vector<double> y)
+void MatQtWidget::collectPolyline(std::vector<double> x, std::vector<double> y)
 {
-	for (auto observer : m_observers)
-	{
-		observer->polylineCollected(x,y);
-	}
+	emit polylineCollected(x,y);
 }
 
 void MatQtWidget::setXAxisVisible(bool _switch)
@@ -121,8 +112,8 @@ void MatQtWidget::setLegendsVisible(bool _switch)
 
 void MatQtWidget::reset()
 {
-	ui.colorbar->hide();
-	ui.legendBoxWidget->hide();
+	ui.colorbar->setVisible(false);
+	ui.legendBoxWidget->setVisible(false);
 }
 
 GLView* MatQtWidget::canvas()

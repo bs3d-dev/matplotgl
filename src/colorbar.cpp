@@ -36,6 +36,9 @@ void Colorbar::setContourLevels(double contour_min, double contour_max, const st
 	m_levels_labels = contour_labels;
 	m_exp = _exp;
 	m_enabled = true;
+
+	if (isVisible())
+		int a = 1;
 }
 
 void Colorbar::setLabel(const std::string& _label)

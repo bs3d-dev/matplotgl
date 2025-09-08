@@ -63,11 +63,12 @@ public:
 	void tempBegin();
 	void tempEnd();
 
-	void beginWellCollection();
+	void beginPointCollection();
 	void beginLineCollection();
 	void beginPolylineCollection();
 	void endPolylineCollection();
 	void cancelPointCollection();
+	void cancelLineCollection();
 	void cancelPolylineCollection();
 
 	void setBackEnd(matplot::backend::MatQt* _backend);
@@ -80,6 +81,7 @@ public:
 	void drawTriangles(const std::vector<double>& x,const std::vector<double>& y,const std::vector<double>& z = {});
 	void drawPolygon(const std::vector<double>& x, const std::vector<double>& y, const std::vector<std::array<float, 4>>& color);
 	void drawPolygon(const std::vector<double>& x, const std::vector<double>& y, const std::array<float, 4>& color);
+	void drawCircles(const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& r, const std::array<float, 4>& color);
 
 public slots:
 	// Mouse events slots
@@ -105,6 +107,7 @@ private:
 
 	std::vector<double>& currentLVA();
 	std::vector<double>& currentTVA();
+	std::vector<double>& currentPVA();
 
 	// Viewport properties
 	int m_width;                   // width: GL canvas horizontal size
@@ -149,8 +152,10 @@ private:
 	unsigned int PVBO_main;
 	unsigned int TVAO_temp;
 	unsigned int LVAO_temp;
+	unsigned int PVAO_temp;
 	unsigned int TVBO_temp;
 	unsigned int LVBO_temp;
+	unsigned int PVBO_temp;
 
 	unsigned int LVAO_border;
 	unsigned int LVBO_border;
@@ -168,8 +173,10 @@ private:
 	std::vector<double> pva_main;
 	std::vector<double> tva_temp;
 	std::vector<double> lva_temp;
+	std::vector<double> pva_temp;
 	std::vector<double> tva_null;
 	std::vector<double> lva_null;
+	std::vector<double> pva_null;
 
 	List m_current_lst;
 	Grid m_grid;
