@@ -16,10 +16,11 @@ int main(int argc, char** argv)
  QApplication app(argc, argv);
  MainWindow window;
 
- std::vector<double> x = linspace(0, 2 * pi);
+ std::vector<double> x = linspace(-2*pi, -pi);
  std::vector<double> y = transform(x, [](auto x) { return sin(x); });
  std::vector<double> y2 = transform(x, [](auto x) { return cos(x); });
  std::vector<double> err(y.size(), 0.1);
+ std::vector<double> zero(y.size(), 0.00);
 
 
  auto b = create_backend<matplot::backend::MatQt>(window.matQt());
@@ -50,13 +51,14 @@ int main(int argc, char** argv)
  //}
 
  ax->hold(on);
- //ax->errorbar(x, y, err, err, err, err);
- //ax->errorbar(x, y, err, error_bar::type::horizontal);
+ //ax->errorbar(x, y, err, err, zero, zero);
+ //ax->errorbar(x, y, err, error_bar::type::vertical);
  //window.matQt()->canvas()->setGridXEnabled(true);
  //window.matQt()->canvas()->setGridYEnabled(true);
 
  ax->plot(x, y, "-");
- ax->plot(x, y2, "-");
+ ax->x_axis().reverse(true);
+ //ax->plot(x, y2, "-");
 
  //ax->legend({ "Sin","Cos" });
 	//auto ich = ax->isocontour(X, Y, Z);
@@ -71,8 +73,8 @@ int main(int argc, char** argv)
   //Start rendering
  f->draw();
 
- ax->x_axis().tick_spacing(0.5);
- ax->y_axis().tick_spacing(0.25);
+ //ax->x_axis().tick_spacing(0.5);
+ //ax->y_axis().tick_spacing(0.25);
 
  return app.exec();
 }

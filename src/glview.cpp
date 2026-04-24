@@ -754,11 +754,10 @@ void GLView::drawPath(const std::vector<double>& x, const std::vector<double>& y
 
 }
 
-void GLView::drawMarkers(const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z)
+void GLView::drawMarkers(const std::vector<double>& x, const std::vector<double>& y, const std::array<float, 4>& color)
 {
 	std::vector<double>& pva = currentPVA();
 
-	const std::array<float, 4> color = { 1.0f,0.0f,0.0f,0.0f };
 	size_t npts = x.size();
 	for (size_t i = 0; i < x.size(); i++)
 	{

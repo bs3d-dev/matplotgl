@@ -142,9 +142,9 @@ namespace matplot::backend {
 
 	void MatQt::draw_markers(const std::vector<double>& x,
 		const std::vector<double>& y,
-		const std::vector<double>& z) 
+		const std::array<float, 4>& color)
 	{
-		m_widget->canvas()->drawMarkers(x, y, z);
+		m_widget->canvas()->drawMarkers(x, y, color);
 	}
 
 	void MatQt::draw_text(const std::vector<double>& x,

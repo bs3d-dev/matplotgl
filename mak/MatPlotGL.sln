@@ -5,10 +5,10 @@ VisualStudioVersion = 16.0.31729.503
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MatPlotGL", "MatPlotTest.vcxproj", "{6896D312-E703-474B-A435-1688B8BC2CA3}"
 	ProjectSection(ProjectDependencies) = postProject
-		{3911BDAF-0D2A-3CFF-B799-0C611DD31DB3} = {3911BDAF-0D2A-3CFF-B799-0C611DD31DB3}
+		{62C80169-4536-3141-9C27-CDC657D089CB} = {62C80169-4536-3141-9C27-CDC657D089CB}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "matplot", "..\matplotplusplus\build\source\matplot\matplot.vcxproj", "{3911BDAF-0D2A-3CFF-B799-0C611DD31DB3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "matplot", "..\matplotplusplus\build\source\matplot\matplot.vcxproj", "{62C80169-4536-3141-9C27-CDC657D089CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,18 +38,20 @@ Global
 		{6896D312-E703-474B-A435-1688B8BC2CA3}.RelWithDebInfo|x64.Build.0 = Release|x64
 		{6896D312-E703-474B-A435-1688B8BC2CA3}.RelWithDebInfo|x86.ActiveCfg = Release|Win32
 		{6896D312-E703-474B-A435-1688B8BC2CA3}.RelWithDebInfo|x86.Build.0 = Release|Win32
-		{3911BDAF-0D2A-3CFF-B799-0C611DD31DB3}.Debug|x64.ActiveCfg = Debug|x64
-		{3911BDAF-0D2A-3CFF-B799-0C611DD31DB3}.Debug|x64.Build.0 = Debug|x64
-		{3911BDAF-0D2A-3CFF-B799-0C611DD31DB3}.Debug|x86.ActiveCfg = Debug|x64
-		{3911BDAF-0D2A-3CFF-B799-0C611DD31DB3}.MinSizeRel|x64.ActiveCfg = MinSizeRel|x64
-		{3911BDAF-0D2A-3CFF-B799-0C611DD31DB3}.MinSizeRel|x64.Build.0 = MinSizeRel|x64
-		{3911BDAF-0D2A-3CFF-B799-0C611DD31DB3}.MinSizeRel|x86.ActiveCfg = MinSizeRel|x64
-		{3911BDAF-0D2A-3CFF-B799-0C611DD31DB3}.Release|x64.ActiveCfg = Release|x64
-		{3911BDAF-0D2A-3CFF-B799-0C611DD31DB3}.Release|x64.Build.0 = Release|x64
-		{3911BDAF-0D2A-3CFF-B799-0C611DD31DB3}.Release|x86.ActiveCfg = Release|x64
-		{3911BDAF-0D2A-3CFF-B799-0C611DD31DB3}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
-		{3911BDAF-0D2A-3CFF-B799-0C611DD31DB3}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
-		{3911BDAF-0D2A-3CFF-B799-0C611DD31DB3}.RelWithDebInfo|x86.ActiveCfg = RelWithDebInfo|x64
+		{62C80169-4536-3141-9C27-CDC657D089CB}.Debug|x64.ActiveCfg = Debug|x64
+		{62C80169-4536-3141-9C27-CDC657D089CB}.Debug|x64.Build.0 = Debug|x64
+		{62C80169-4536-3141-9C27-CDC657D089CB}.Debug|x86.ActiveCfg = Debug|x64
+		{62C80169-4536-3141-9C27-CDC657D089CB}.MinSizeRel|x64.ActiveCfg = Release|x64
+		{62C80169-4536-3141-9C27-CDC657D089CB}.MinSizeRel|x64.Build.0 = Release|x64
+		{62C80169-4536-3141-9C27-CDC657D089CB}.MinSizeRel|x86.ActiveCfg = Release|x64
+		{62C80169-4536-3141-9C27-CDC657D089CB}.MinSizeRel|x86.Build.0 = Release|x64
+		{62C80169-4536-3141-9C27-CDC657D089CB}.Release|x64.ActiveCfg = Release|x64
+		{62C80169-4536-3141-9C27-CDC657D089CB}.Release|x64.Build.0 = Release|x64
+		{62C80169-4536-3141-9C27-CDC657D089CB}.Release|x86.ActiveCfg = Release|x64
+		{62C80169-4536-3141-9C27-CDC657D089CB}.RelWithDebInfo|x64.ActiveCfg = Release|x64
+		{62C80169-4536-3141-9C27-CDC657D089CB}.RelWithDebInfo|x64.Build.0 = Release|x64
+		{62C80169-4536-3141-9C27-CDC657D089CB}.RelWithDebInfo|x86.ActiveCfg = Release|x64
+		{62C80169-4536-3141-9C27-CDC657D089CB}.RelWithDebInfo|x86.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

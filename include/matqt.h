@@ -67,7 +67,7 @@ namespace matplot::backend {
 			const std::array<float, 4>& color) override;
 		void draw_markers(const std::vector<double>& x,
 			const std::vector<double>& y,
-			const std::vector<double>& z = {}) override;
+			const std::array<float, 4>& color = {}) override;
 		void draw_text(const std::vector<double>& x,
 			const std::vector<double>& y,
 			const std::vector<double>& z = {}) override;

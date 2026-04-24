@@ -77,7 +77,7 @@ public:
 	void setYAxis(double _min, double _max, const std::vector<double>& _ticks);
 
 	void drawPath(const std::vector<double>& x, const std::vector<double>& y, const std::array<float, 4>& color);
-	void drawMarkers(const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z = {});
+	void drawMarkers(const std::vector<double>& x, const std::vector<double>& y, const std::array<float, 4>& color);
 	void drawTriangles(const std::vector<double>& x,const std::vector<double>& y,const std::vector<double>& z = {});
 	void drawPolygon(const std::vector<double>& x, const std::vector<double>& y, const std::vector<std::array<float, 4>>& color);
 	void drawPolygon(const std::vector<double>& x, const std::vector<double>& y, const std::array<float, 4>& color);
