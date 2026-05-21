@@ -7,7 +7,7 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="MatPlotTest.vcxproj">
+  <Project Path="MatPlotTest.vcxproj" Id="6896d312-e703-474b-a435-1688b8bc2ca3">
     <BuildType Solution="MinSizeRel|*" Project="Release" />
     <BuildType Solution="RelWithDebInfo|*" Project="Release" />
   </Project>
