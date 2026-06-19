@@ -1,10 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(matplotgl LANGUAGES CXX)
+project(matplotgl VERSION 1.0.0 LANGUAGES CXX)
 
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}" CACHE PATH "Install path prefix" FORCE)
-endif()
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -62,6 +61,8 @@ add_library(matplotgl STATIC
 target_include_directories(matplotgl
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/libs/glm/include>
 )
 
@@ -80,6 +81,34 @@ if(WIN32)
 endif()
 
 install(TARGETS matplotgl
-		ARCHIVE DESTINATION $<$<CONFIG:Debug>:debug/>lib
-		LIBRARY DESTINATION $<$<CONFIG:Debug>:debug/>lib
+    EXPORT matplotglTargets
+    ARCHIVE DESTINATION $<$<CONFIG:Debug>:debug/>${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION $<$<CONFIG:Debug>:debug/>${CMAKE_INSTALL_LIBDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+set(MATPLOTGL_CMAKE_CONFIG_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/matplotgl)
+
+install(EXPORT matplotglTargets
+    FILE matplotglTargets.cmake
+    NAMESPACE matplotgl::
+    DESTINATION ${MATPLOTGL_CMAKE_CONFIG_DIR}
+)
+
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/matplotglConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/matplotglConfig.cmake"
+    INSTALL_DESTINATION ${MATPLOTGL_CMAKE_CONFIG_DIR}
+)
+
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/matplotglConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/matplotglConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/matplotglConfigVersion.cmake"
+    DESTINATION ${MATPLOTGL_CMAKE_CONFIG_DIR}
 )
