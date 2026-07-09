@@ -13,13 +13,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/gui")
 
-find_package(Qt6 COMPONENTS Core Gui Widgets OpenGL OpenGLWidgets QUIET)
-if(Qt6_FOUND)
-    set(QT_VERSION_MAJOR 6)
-else()
-    find_package(Qt5 5.15 COMPONENTS Core Gui Widgets OpenGL OpenGLWidgets REQUIRED)
-    set(QT_VERSION_MAJOR 5)
-endif()
+find_package(Qt6 COMPONENTS Core Gui Widgets OpenGL OpenGLWidgets REQUIRED)
+set(QT_VERSION_MAJOR 6)
 
 find_package(Matplot++ REQUIRED)
 
