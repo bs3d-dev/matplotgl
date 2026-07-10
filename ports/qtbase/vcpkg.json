@@ -1,0 +1,16 @@
+{
+    "name": "qtbase",
+    "version": "6.8.0",
+    "description": "Empty overlay stub for qtbase — resolves to the globally installed Qt6 via CMAKE_PREFIX_PATH instead of building from source.",
+    "features": {
+        "gui": {
+            "description": "Qt Gui module"
+        },
+        "widgets": {
+            "description": "Qt Widgets module"
+        },
+        "opengl": {
+            "description": "Qt OpenGL / OpenGLWidgets modules"
+        }
+    }
+}
