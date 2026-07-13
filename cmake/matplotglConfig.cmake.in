@@ -1,0 +1,11 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+set(_matplotgl_qt_version_major @QT_VERSION_MAJOR@)
+find_dependency(Qt${_matplotgl_qt_version_major} COMPONENTS Core Gui Widgets OpenGL OpenGLWidgets)
+find_dependency(Matplot++)
+
+include("${CMAKE_CURRENT_LIST_DIR}/matplotglTargets.cmake")
+
+check_required_components(matplotgl)
