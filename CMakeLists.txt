@@ -41,6 +41,7 @@ set(MATPLOTGL_HEADERS
     include/shader.h
     include/title_widget.h
     include/util.h
+    include/ui_matqt_widget.h
 )
 
 set(MATPLOTGL_UIS
